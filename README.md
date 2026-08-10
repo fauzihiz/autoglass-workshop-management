@@ -2,8 +2,8 @@
 
 > A web-based management system for automotive glass workshops to manage customers, vehicles, glass inventory, rack locations, transactions, technicians, payments, and business insights in one place.
 
-**Status:** 🚧 In Development  
-**Version:** 0.1.0  
+**Status:** 🚧 In Development
+**Version:** 0.1.0
 **Deployment Target:** Shared Hosting
 
 ---
@@ -18,23 +18,24 @@
 
 ## 📋 Table of Contents
 
-- [Core Features](#-core-features)
-- [System Concepts](#-system-concepts)
-- [Transaction Types](#-transaction-types)
-- [Inventory Management](#-inventory-management)
-- [Profit Calculation](#-profit-calculation)
-- [Tech Stack](#-tech-stack)
-- [Prerequisites](#-prerequisites)
-- [Getting Started](#-getting-started)
-- [Environment Variables](#-environment-variables)
-- [Usage Guide](#-usage-guide)
-- [Database Overview](#-database-overview)
-- [Roadmap](#-roadmap)
-- [Progress Tracker](#-progress-tracker)
-- [Testing](#-testing)
-- [Deployment](#-deployment)
-- [Contributing](#-contributing)
-- [License](#-license)
+* [Core Features](#-core-features)
+* [System Concepts](#-system-concepts)
+* [Transaction Types](#-transaction-types)
+* [Inventory Management](#-inventory-management)
+* [Profit Calculation](#-profit-calculation)
+* [Tech Stack](#-tech-stack)
+* [Prerequisites](#-prerequisites)
+* [Getting Started](#-getting-started)
+* [Environment Variables](#-environment-variables)
+* [Usage Guide](#-usage-guide)
+* [Database Overview](#-database-overview)
+* [Demo & Production Strategy](#-demo--production-strategy)
+* [Roadmap](#-roadmap)
+* [Progress Tracker](#-progress-tracker)
+* [Testing](#-testing)
+* [Deployment](#-deployment)
+* [Contributing](#-contributing)
+* [License](#-license)
 
 ---
 
@@ -42,64 +43,65 @@
 
 ### Customer Management
 
-- Create and manage customer records
-- Store customer contact information
-- Manage multiple vehicles belonging to one customer
-- Track customer transaction history
-- Search customers by name or contact number
+* Create and manage customer records
+* Store customer contact information
+* Manage multiple vehicles belonging to one customer
+* Track customer transaction history
+* Search customers by name or contact number
 
 ### Vehicle Management
 
-- Store vehicle brand and model
-- Store vehicle year when applicable
-- Store license plate number
-- Associate vehicles with customers
-- Use vehicle information for transaction and complaint traceability
+* Store vehicle brand and model
+* Store vehicle year when applicable
+* Store license plate number
+* Associate vehicles with customers
+* Use vehicle information for transaction and complaint traceability
 
 ### Automotive Glass Catalog
 
-- Manage glass products
-- Define glass positions such as `LFW`, `FDR`, `FDL`, `RDR`, `RDL`, `RW`, etc.
-- Define compatible vehicle models
-- Support products compatible with multiple vehicle models
-- Store accessories such as sensors, shadebands, mouldings, antennas, and other attached components
-- Set minimum stock thresholds
+* Manage glass products
+* Define glass positions such as `LFW`, `FDR`, `FDL`, `RDR`, `RDL`, `RW`, etc.
+* Define compatible vehicle models
+* Support products compatible with multiple vehicle models
+* Support optional vehicle year ranges
+* Store accessories such as sensors, shadebands, mouldings, antennas, and other attached components
+* Set minimum stock thresholds
 
 ### Inventory Management
 
-- Track glass stock by product
-- Track stock by supplier lot
-- Track stock across multiple racks
-- Transfer stock between racks
-- Record stock movements
-- Perform stock opname
-- Track actual purchase cost
-- Identify low-stock and out-of-stock products
-- View rack-level stock availability
+* Track glass stock by product
+* Track stock by supplier lot
+* Track stock across multiple racks
+* Transfer stock between racks
+* Record stock movements
+* Perform stock opname
+* Track actual purchase cost
+* Identify low-stock and out-of-stock products
+* View rack-level stock availability
 
 ### Supplier Management
 
-- Manage suppliers
-- Store supplier pricelist
-- Store supplier discount information when applicable
-- Store actual purchase price
-- Support different pricing schemes between suppliers
-- Maintain historical purchase costs through stock lots
+* Manage suppliers
+* Store supplier pricelist
+* Store supplier discount information when applicable
+* Store actual purchase price
+* Support different pricing schemes between suppliers
+* Maintain historical purchase costs through stock lots
 
 ### Transaction Management
 
 Support three main transaction categories:
 
-- **Glass Sale**
-- **Glass Installation**
-- **Service Only**
+* **Glass Sale**
+* **Glass Installation**
+* **Service Only**
 
 Transactions can contain:
 
-- Glass products
-- Services
-- Packages
-- Other charges when required
+* Glass products
+* Services
+* Packages
+* Other charges when required
 
 A glass installation can be recorded as a single customer-facing price, for example:
 
@@ -108,39 +110,41 @@ Front windshield installation - Avanza
 Rp950,000
 ```
 
-The system can still internally trace the glass product and stock cost used for that transaction.
+The customer does not need to see separate glass and installation prices.
+
+Internally, however, the system still tracks the actual glass product and stock cost used for inventory and profit calculations.
 
 ### Payment Management
 
-- Record full payments
-- Record partial payments
-- Record unpaid transactions
-- Support multiple payments for one transaction
-- Track payment status
-- Support cash, transfer, QRIS, and other payment methods
+* Record full payments
+* Record partial payments
+* Record unpaid transactions
+* Support multiple payments for one transaction
+* Track payment status
+* Support cash, transfer, QRIS, and other payment methods
 
 ### Technician Tracking
 
-- Manage technician records
-- Assign technicians to service work
-- Track which technician performed a service
-- Trace technician information from historical transactions
+* Manage technician records
+* Assign technicians to service work
+* Track which technician performed a service
+* Trace technician information from historical transactions
 
 ### Complaint Traceability
 
 Transaction history can be traced using:
 
-- Customer
-- Vehicle
-- Vehicle brand
-- Vehicle model
-- License plate
-- Transaction date
-- Glass product
-- Technician
-- Invoice number
+* Customer
+* Vehicle
+* Vehicle brand
+* Vehicle model
+* License plate
+* Transaction date
+* Glass product
+* Technician
+* Invoice number
 
-This helps prevent unsupported claims and provides a clear service history when handling customer complaints.
+This provides a reliable service history and helps prevent unsupported customer claims.
 
 ### Price Calculator
 
@@ -148,14 +152,16 @@ The inventory interface provides a pricing calculator for negotiation.
 
 The calculator can use:
 
-- Supplier pricelist
-- Supplier discount
-- Actual purchase cost
-- Desired customer discount
-- Desired selling price
-- Estimated profit
+* Supplier pricelist
+* Supplier discount
+* Actual purchase cost
+* Desired customer discount
+* Desired selling price
+* Estimated profit
 
-The calculator is a **UI utility only** and does not create a separate database record.
+The calculator is a **UI utility only**.
+
+It does not modify inventory prices or create a database record.
 
 The final negotiated selling price is stored only when the transaction is confirmed.
 
@@ -163,21 +169,21 @@ The final negotiated selling price is stored only when the transaction is confir
 
 The system provides insights into:
 
-- Total revenue
-- Glass-only sales
-- Glass installation revenue
-- Service-only revenue
-- Glass cost
-- Profit
-- Transaction volume
-- Best-selling glass products
-- Glass movement
-- Stock status
-- Low-stock products
-- Customer purchasing frequency
-- Top customers
-- Sales trends
-- Stock movement trends
+* Total revenue
+* Glass-only sales
+* Glass installation revenue
+* Service-only revenue
+* Glass cost
+* Profit
+* Transaction volume
+* Best-selling glass products
+* Glass movement
+* Stock status
+* Low-stock products
+* Customer purchasing frequency
+* Top customers
+* Sales trends
+* Stock movement trends
 
 ---
 
@@ -344,7 +350,7 @@ LOW STOCK
 OUT OF STOCK
 ```
 
-The stock dashboard will provide a dedicated warning list so staff can quickly identify products that may need to be reordered.
+The stock dashboard provides a dedicated warning list so staff can quickly identify products that may need to be reordered.
 
 ---
 
@@ -371,7 +377,7 @@ GLASS_SALE
 
 ### 2. Glass Installation
 
-Customer purchases an installation package or a combined glass + installation service.
+Customer purchases a glass installation package or combined glass + installation service.
 
 Example:
 
@@ -380,10 +386,10 @@ Front windshield installation - Avanza
 Rp950,000
 ```
 
-The customer does not necessarily need to see:
+The customer does not need to see:
 
 ```text
-Glass       Rp800,000
+Glass         Rp800,000
 Installation Rp150,000
 ```
 
@@ -414,7 +420,7 @@ Transaction category:
 SERVICE_ONLY
 ```
 
-No glass cost is deducted.
+No glass stock is deducted.
 
 ---
 
@@ -426,7 +432,7 @@ The business uses a simple profit formula:
 Profit = Selling Price - Glass Cost
 ```
 
-For a glass sale:
+### Glass Sale
 
 ```text
 Selling Price = Rp800,000
@@ -435,7 +441,7 @@ Glass Cost    = Rp550,000
 Profit        = Rp250,000
 ```
 
-For glass installation:
+### Glass Installation
 
 ```text
 Selling Price = Rp950,000
@@ -444,7 +450,7 @@ Glass Cost    = Rp550,000
 Profit        = Rp400,000
 ```
 
-For service only:
+### Service Only
 
 ```text
 Selling Price = Rp200,000
@@ -453,27 +459,23 @@ Glass Cost    = Rp0
 Profit        = Rp200,000
 ```
 
-### Important Business Rule
+### Business Rule
 
 The system currently does **not** deduct technician labor, installation cost, or other service-related costs from profit.
 
 Therefore:
 
 ```text
-Total Profit
-=
-Total Revenue
--
-Total Glass Cost
+Total Profit = Total Revenue - Total Glass Cost
 ```
 
-Historical glass cost is determined from the actual stock lot used in the transaction.
+Historical glass cost is determined from the actual stock lot allocated to the transaction.
 
 ---
 
 ## 🧮 Price Calculator
 
-The price calculator is intended to help staff negotiate with customers.
+The price calculator is a negotiation tool used when a customer asks for a price.
 
 Example:
 
@@ -497,53 +499,61 @@ Estimated Profit
 Rp150,000
 ```
 
-The calculator does not modify the inventory or product price.
+The admin can then negotiate and enter the final price.
 
-When the customer agrees on a price:
+For example:
 
 ```text
 Final Selling Price
 Rp750,000
 ```
 
-the final value is stored in the transaction.
+Only the final agreed price is saved when the transaction is confirmed.
+
+The calculator itself does not modify the product price, inventory, supplier data, or stock cost.
 
 ---
 
-## 🛠️ Tech Stack
+# 🛠️ Tech Stack
 
 ### Backend
 
-- PHP
-- Laravel
-- Laravel Eloquent ORM
+* PHP
+* Laravel
+* Laravel Eloquent ORM
 
 ### Frontend
 
-- Blade
-- Livewire
-- Alpine.js
-- Tailwind CSS
+* Blade
+* Livewire
+* Alpine.js
+* Tailwind CSS
 
 ### Database
 
-- MySQL / MariaDB
+**Development / Demo**
+
+* SQLite
+
+**Production / Client**
+
+* MySQL / MariaDB
 
 ### Development Tools
 
-- Git
-- GitHub
-- Composer
-- npm
-- Vite
+* Git
+* GitHub
+* Composer
+* npm
+* Vite
 
 ### Deployment
 
-- Shared hosting
-- Apache / PHP
-- MySQL / MariaDB
+* Shared hosting
+* Apache / PHP
+* MySQL / MariaDB
 
-The architecture intentionally avoids infrastructure requirements such as Redis, workers, or VPS-only services for the initial version.
+The application is intentionally designed to avoid infrastructure requirements such as Redis, dedicated queue workers, or VPS-only services for the initial version.
 
 ---
 
@@ -551,11 +561,12 @@ The architecture intentionally avoids infrastructure requirements such as Redis,
 
 Before running the project locally, make sure you have:
 
-- PHP with the version required by the selected Laravel version
-- Composer
-- Node.js and npm
-- MySQL or MariaDB
-- Git
+* PHP with the version required by the selected Laravel version
+* Composer
+* Node.js and npm
+* Git
+
+SQLite is used for the default development/demo environment, so a separate database server is not required for local development.
 
 Verify your environment:
 
@@ -608,29 +619,35 @@ copy .env.example .env
 php artisan key:generate
 ```
 
-### 6. Configure the Database
+### 6. Prepare the Demo Database
 
-Create a MySQL database and update the database variables in `.env`.
-
-### 7. Run Migrations
+Create the SQLite database:
 
 ```bash
-php artisan migrate
+touch database/database.sqlite
 ```
 
-### 8. Seed Development Data
+On Windows PowerShell:
+
+```powershell
+New-Item database/database.sqlite -ItemType File
+```
+
+### 7. Run Migrations and Seed Demo Data
 
 ```bash
-php artisan db:seed
+php artisan migrate:fresh --seed
 ```
 
-### 9. Build Frontend Assets
+This creates the database structure and populates the application with realistic demo data.
+
+### 8. Build Frontend Assets
 
 ```bash
 npm run build
 ```
 
-### 10. Start the Development Server
+### 9. Start the Development Server
 
 ```bash
 php artisan serve
@@ -646,27 +663,170 @@ http://127.0.0.1:8000
 
 ## 🔐 Environment Variables
 
-Create a `.env` file based on `.env.example`.
+The application uses Laravel's environment configuration to switch between development/demo and production databases.
 
-Example:
+### Demo / Development
+
+The default configuration uses SQLite:
 
 ```env
 APP_NAME="Workshop Management System"
 APP_ENV=local
-APP_KEY=
 APP_DEBUG=true
 APP_URL=http://127.0.0.1:8000
 
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=workshop_management
-DB_USERNAME=root
-DB_PASSWORD=
-
+DB_CONNECTION=sqlite
 ```
 
+The database file is:
+
+```text
+database/database.sqlite
+```
+
+### Production
+
+For a real client deployment, configure MySQL or MariaDB:
+
+```env
+APP_ENV=production
+APP_DEBUG=false
+
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=workshop_management
+DB_USERNAME=your_database_user
+DB_PASSWORD=your_database_password
+```
+
+The application code does not need to be rewritten when switching between SQLite and MySQL/MariaDB.
+
 Never commit `.env` or real credentials to the repository.
+
+---
+
+# 🎭 Demo & Production Strategy
+
+This project is designed to serve two purposes:
+
+1. **Learning and portfolio project**
+2. **Potential foundation for a real client project**
+
+The application therefore uses the same Laravel application architecture in both environments.
+
+### Demo
+
+```text
+Laravel
+   ↓
+Eloquent
+   ↓
+SQLite
+   ↓
+Seeded Demo Data
+   ↓
+Demo Application
+```
+
+### Production
+
+```text
+Laravel
+   ↓
+Eloquent
+   ↓
+MySQL / MariaDB
+   ↓
+Real Workshop Data
+   ↓
+Client Application
+```
+
+The goal is to avoid building a separate "fake demo application".
+
+The demo uses the same business logic, database structure, models, relationships, inventory workflows, transaction workflows, and analytics that the production application will use.
+
+Only the **database connection and data source** change.
+
+---
+
+## 🌱 Demo Data
+
+The development database should contain realistic seeded data so the application is immediately usable as a portfolio demo.
+
+Seed data should include examples of:
+
+* Customers
+* Multiple vehicles per customer
+* Vehicle brands and models
+* Technicians
+* Suppliers
+* Glass products
+* Product compatibility
+* Accessories
+* Services
+* Multiple racks
+* Stock lots from different suppliers
+* Stock distributed across multiple racks
+* Low-stock products
+* Out-of-stock products
+* Glass sales
+* Glass installation transactions
+* Service-only transactions
+* Full payments
+* Partial payments
+* Historical transactions
+
+The seed data should intentionally create meaningful dashboard results rather than purely random records.
+
+For example:
+
+```text
+Avanza LFW
+Stock: 2
+Minimum: 5
+Status: LOW STOCK
+```
+
+and:
+
+```text
+Top Customer
+PT ABC
+
+Transactions: 15
+```
+
+This allows the dashboard, inventory warnings, analytics, and transaction history to be demonstrated immediately.
+
+---
+
+## ⚠️ Database Environment Rules
+
+### Development / Demo
+
+It is safe to reset the database:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+This removes existing local/demo data and recreates the database from migrations and seeders.
+
+### Production
+
+**Never use `migrate:fresh --seed` in production.**
+
+Use:
+
+```bash
+php artisan migrate --force
+```
+
+Production data must be preserved.
+
+Seeders are primarily intended for development and demonstration.
 
 ---
 
@@ -753,6 +913,17 @@ Save Service Record
 Invoice
 ```
 
+The customer may see only one combined price.
+
+Example:
+
+```text
+Front windshield installation - Avanza
+Rp950,000
+```
+
+Internally, the system still records which glass stock was used.
+
 ---
 
 ### Create a Service-Only Transaction
@@ -806,11 +977,12 @@ accessories
 
 services
 
+technicians
+
 transactions
     ├── transaction_items
     │       ├── stock_allocations
     │       └── service_assignments
-    │               └── technicians
     │
     └── payments
 
@@ -847,15 +1019,17 @@ Customer
 
 **Goal:** Establish the Laravel application and database foundation.
 
-- [ ] Initialize Laravel project
-- [ ] Configure MySQL
-- [ ] Configure environment
-- [ ] Set up Git repository
-- [ ] Set up base layout
-- [ ] Install and configure Livewire
-- [ ] Install and configure Tailwind CSS
-- [ ] Establish application conventions
-- [ ] Create initial database migrations
+* [ ] Initialize Laravel project
+* [ ] Configure SQLite development database
+* [ ] Configure MySQL production compatibility
+* [ ] Configure environment
+* [ ] Set up Git repository
+* [ ] Set up base layout
+* [ ] Install and configure Livewire
+* [ ] Install and configure Tailwind CSS
+* [ ] Establish application conventions
+* [ ] Create initial database migrations
+* [ ] Create base seeders
 
 ---
 
@@ -863,19 +1037,19 @@ Customer
 
 **Goal:** Build all foundational data management.
 
-- [ ] Customer CRUD
-- [ ] Vehicle CRUD
-- [ ] Technician CRUD
-- [ ] Supplier CRUD
-- [ ] Car brand CRUD
-- [ ] Car model CRUD
-- [ ] Glass position CRUD
-- [ ] Glass product CRUD
-- [ ] Product compatibility management
-- [ ] Accessory CRUD
-- [ ] Product-accessory management
-- [ ] Service CRUD
-- [ ] Rack CRUD
+* [ ] Customer CRUD
+* [ ] Vehicle CRUD
+* [ ] Technician CRUD
+* [ ] Supplier CRUD
+* [ ] Car brand CRUD
+* [ ] Car model CRUD
+* [ ] Glass position CRUD
+* [ ] Glass product CRUD
+* [ ] Product compatibility management
+* [ ] Accessory CRUD
+* [ ] Product-accessory management
+* [ ] Service CRUD
+* [ ] Rack CRUD
 
 ---
 
@@ -883,21 +1057,21 @@ Customer
 
 **Goal:** Build reliable multi-rack and supplier-lot inventory.
 
-- [ ] Stock lot management
-- [ ] Supplier purchase information
-- [ ] Actual purchase cost tracking
-- [ ] Stock balance management
-- [ ] Multi-rack stock support
-- [ ] Stock-in workflow
-- [ ] Stock transfer workflow
-- [ ] Stock-out workflow
-- [ ] Stock movement history
-- [ ] Minimum stock configuration
-- [ ] Low-stock warnings
-- [ ] Out-of-stock warnings
-- [ ] Stock opname
-- [ ] Stock adjustment
-- [ ] Inventory search and filtering
+* [ ] Stock lot management
+* [ ] Supplier purchase information
+* [ ] Actual purchase cost tracking
+* [ ] Stock balance management
+* [ ] Multi-rack stock support
+* [ ] Stock-in workflow
+* [ ] Stock transfer workflow
+* [ ] Stock-out workflow
+* [ ] Stock movement history
+* [ ] Minimum stock configuration
+* [ ] Low-stock warnings
+* [ ] Out-of-stock warnings
+* [ ] Stock opname
+* [ ] Stock adjustment
+* [ ] Inventory search and filtering
 
 ---
 
@@ -905,23 +1079,24 @@ Customer
 
 **Goal:** Build the complete sales and service workflow.
 
-- [ ] Customer selection
-- [ ] Vehicle selection
-- [ ] Glass availability lookup
-- [ ] Rack availability display
-- [ ] Price calculator
-- [ ] Glass sale transaction
-- [ ] Glass installation transaction
-- [ ] Service-only transaction
-- [ ] Flexible package pricing
-- [ ] Stock allocation
-- [ ] Technician assignment
-- [ ] Payment recording
-- [ ] Partial payment support
-- [ ] Payment status
-- [ ] Transaction confirmation
-- [ ] Invoice generation
-- [ ] Invoice printing
+* [ ] Customer selection
+* [ ] Vehicle selection
+* [ ] Glass availability lookup
+* [ ] Rack availability display
+* [ ] Price calculator
+* [ ] Glass sale transaction
+* [ ] Glass installation transaction
+* [ ] Service-only transaction
+* [ ] Flexible package pricing
+* [ ] Stock allocation
+* [ ] Technician assignment
+* [ ] Payment recording
+* [ ] Partial payment support
+* [ ] Payment status
+* [ ] Transaction confirmation
+* [ ] Invoice generation
+* [ ] Invoice printing
+* [ ] Profit calculation
 
 ---
 
@@ -929,16 +1104,17 @@ Customer
 
 **Goal:** Make every completed job traceable.
 
-- [ ] Transaction history
-- [ ] Transaction detail
-- [ ] Customer history
-- [ ] Vehicle history
-- [ ] Technician service history
-- [ ] Glass product history
-- [ ] Stock lot traceability
-- [ ] Invoice history
-- [ ] Payment history
-- [ ] Complaint lookup workflow
+* [ ] Transaction history
+* [ ] Transaction detail
+* [ ] Customer history
+* [ ] Vehicle history
+* [ ] License plate lookup
+* [ ] Technician service history
+* [ ] Glass product history
+* [ ] Stock lot traceability
+* [ ] Invoice history
+* [ ] Payment history
+* [ ] Complaint lookup workflow
 
 ---
 
@@ -946,22 +1122,22 @@ Customer
 
 **Goal:** Turn operational data into useful business insights.
 
-- [ ] Overview dashboard
-- [ ] Revenue summary
-- [ ] Glass sales summary
-- [ ] Glass installation summary
-- [ ] Service-only summary
-- [ ] Glass cost summary
-- [ ] Profit summary
-- [ ] Sales trend chart
-- [ ] Best-selling glass
-- [ ] Glass movement analysis
-- [ ] Customer ranking
-- [ ] Purchase frequency analysis
-- [ ] Stock alert dashboard
-- [ ] Fast-moving products
-- [ ] Slow-moving products
-- [ ] Stock value overview
+* [ ] Overview dashboard
+* [ ] Revenue summary
+* [ ] Glass sales summary
+* [ ] Glass installation summary
+* [ ] Service-only summary
+* [ ] Glass cost summary
+* [ ] Profit summary
+* [ ] Sales trend chart
+* [ ] Best-selling glass
+* [ ] Glass movement analysis
+* [ ] Customer ranking
+* [ ] Purchase frequency analysis
+* [ ] Stock alert dashboard
+* [ ] Fast-moving products
+* [ ] Slow-moving products
+* [ ] Stock value overview
 
 ---
 
@@ -969,17 +1145,17 @@ Customer
 
 **Goal:** Prepare the application for real workshop usage.
 
-- [ ] Form validation review
-- [ ] Authorization architecture preparation
-- [ ] Database indexing
-- [ ] Error handling
-- [ ] Transaction rollback testing
-- [ ] Stock consistency testing
-- [ ] Invoice testing
-- [ ] Backup strategy
-- [ ] Production environment configuration
-- [ ] Shared hosting deployment
-- [ ] Production smoke testing
+* [ ] Form validation review
+* [ ] Authorization architecture preparation
+* [ ] Database indexing
+* [ ] Error handling
+* [ ] Transaction rollback testing
+* [ ] Stock consistency testing
+* [ ] Invoice testing
+* [ ] Backup strategy
+* [ ] Production environment configuration
+* [ ] Shared hosting deployment
+* [ ] Production smoke testing
 
 ---
 
@@ -1028,62 +1204,64 @@ Production          ░░░░░░░░░░  0%
 Authentication      ░░░░░░░░░░  0%
 ```
 
-> Progress percentages should be updated as features are completed.
-
 ### Detailed Tracker
 
-| Phase | Feature | Status |
-|---|---|---|
-| Foundation | Laravel setup | ⬜ |
-| Foundation | Database configuration | ⬜ |
-| Foundation | Base UI layout | ⬜ |
-| Foundation | Livewire setup | ⬜ |
-| Foundation | Tailwind setup | ⬜ |
-| Master Data | Customer management | ⬜ |
-| Master Data | Vehicle management | ⬜ |
-| Master Data | Technician management | ⬜ |
-| Master Data | Supplier management | ⬜ |
-| Master Data | Car brand management | ⬜ |
-| Master Data | Car model management | ⬜ |
-| Master Data | Glass position management | ⬜ |
-| Master Data | Glass product management | ⬜ |
-| Master Data | Compatibility management | ⬜ |
-| Master Data | Accessory management | ⬜ |
-| Master Data | Service management | ⬜ |
-| Master Data | Rack management | ⬜ |
-| Inventory | Stock lot management | ⬜ |
-| Inventory | Stock-in | ⬜ |
-| Inventory | Multi-rack stock | ⬜ |
-| Inventory | Stock transfer | ⬜ |
-| Inventory | Stock movement | ⬜ |
-| Inventory | Stock opname | ⬜ |
-| Inventory | Minimum stock | ⬜ |
-| Inventory | Low-stock warning | ⬜ |
-| Transactions | Glass sale | ⬜ |
-| Transactions | Glass installation | ⬜ |
-| Transactions | Service only | ⬜ |
-| Transactions | Package pricing | ⬜ |
-| Transactions | Price calculator | ⬜ |
-| Transactions | Stock allocation | ⬜ |
-| Transactions | Technician assignment | ⬜ |
-| Transactions | Payment management | ⬜ |
-| Transactions | Invoice | ⬜ |
-| History | Transaction history | ⬜ |
-| History | Vehicle history | ⬜ |
-| History | Technician history | ⬜ |
-| History | Complaint traceability | ⬜ |
-| Analytics | Revenue dashboard | ⬜ |
-| Analytics | Profit dashboard | ⬜ |
-| Analytics | Glass sales analytics | ⬜ |
-| Analytics | Installation analytics | ⬜ |
-| Analytics | Customer analytics | ⬜ |
-| Analytics | Stock analytics | ⬜ |
-| Production | Validation review | ⬜ |
-| Production | Error handling | ⬜ |
-| Production | Testing | ⬜ |
-| Production | Deployment | ⬜ |
-| Authentication | Login | ⬜ |
-| Authentication | Roles & permissions | ⬜ |
+| Phase          | Feature                        | Status |
+| -------------- | ------------------------------ | ------ |
+| Foundation     | Laravel setup                  | ⬜      |
+| Foundation     | SQLite demo database           | ⬜      |
+| Foundation     | MySQL production compatibility | ⬜      |
+| Foundation     | Environment configuration      | ⬜      |
+| Foundation     | Base UI layout                 | ⬜      |
+| Foundation     | Livewire setup                 | ⬜      |
+| Foundation     | Tailwind setup                 | ⬜      |
+| Foundation     | Database migrations            | ⬜      |
+| Foundation     | Demo seeders                   | ⬜      |
+| Master Data    | Customer management            | ⬜      |
+| Master Data    | Vehicle management             | ⬜      |
+| Master Data    | Technician management          | ⬜      |
+| Master Data    | Supplier management            | ⬜      |
+| Master Data    | Car brand management           | ⬜      |
+| Master Data    | Car model management           | ⬜      |
+| Master Data    | Glass position management      | ⬜      |
+| Master Data    | Glass product management       | ⬜      |
+| Master Data    | Compatibility management       | ⬜      |
+| Master Data    | Accessory management           | ⬜      |
+| Master Data    | Service management             | ⬜      |
+| Master Data    | Rack management                | ⬜      |
+| Inventory      | Stock lot management           | ⬜      |
+| Inventory      | Stock-in                       | ⬜      |
+| Inventory      | Multi-rack stock               | ⬜      |
+| Inventory      | Stock transfer                 | ⬜      |
+| Inventory      | Stock movement                 | ⬜      |
+| Inventory      | Stock opname                   | ⬜      |
+| Inventory      | Minimum stock                  | ⬜      |
+| Inventory      | Low-stock warning              | ⬜      |
+| Transactions   | Glass sale                     | ⬜      |
+| Transactions   | Glass installation             | ⬜      |
+| Transactions   | Service only                   | ⬜      |
+| Transactions   | Package pricing                | ⬜      |
+| Transactions   | Price calculator               | ⬜      |
+| Transactions   | Stock allocation               | ⬜      |
+| Transactions   | Technician assignment          | ⬜      |
+| Transactions   | Payment management             | ⬜      |
+| Transactions   | Invoice                        | ⬜      |
+| Transactions   | Profit calculation             | ⬜      |
+| History        | Transaction history            | ⬜      |
+| History        | Vehicle history                | ⬜      |
+| History        | Complaint traceability         | ⬜      |
+| Analytics      | Revenue dashboard              | ⬜      |
+| Analytics      | Profit dashboard               | ⬜      |
+| Analytics      | Glass sales analytics          | ⬜      |
+| Analytics      | Installation analytics         | ⬜      |
+| Analytics      | Customer analytics             | ⬜      |
+| Analytics      | Stock analytics                | ⬜      |
+| Production     | Validation review              | ⬜      |
+| Production     | Error handling                 | ⬜      |
+| Production     | Testing                        | ⬜      |
+| Production     | Deployment                     | ⬜      |
+| Authentication | Login                          | ⬜      |
+| Authentication | Roles & permissions            | ⬜      |
 
 ### Status Legend
 
@@ -1112,17 +1290,19 @@ php artisan test --filter=TestName
 
 Important test areas include:
 
-- Stock calculation
-- Stock transfer
-- Stock opname
-- Stock allocation
-- Transaction creation
-- Transaction rollback
-- Payment calculation
-- Profit calculation
-- Minimum stock warnings
-- Product compatibility
-- Complaint traceability
+* Stock calculation
+* Stock transfer
+* Stock opname
+* Stock allocation
+* Transaction creation
+* Transaction rollback
+* Payment calculation
+* Profit calculation
+* Minimum stock warnings
+* Product compatibility
+* Complaint traceability
+* SQLite development behavior
+* MySQL production compatibility
 
 ---
 
@@ -1130,24 +1310,39 @@ Important test areas include:
 
 The initial production environment is designed for **shared hosting**.
 
-The deployment process will generally include:
+### Production Database
+
+Production should use:
+
+```text
+MySQL / MariaDB
+```
+
+Configure the production `.env` with the database credentials provided by the hosting provider.
+
+### Deployment Steps
 
 1. Upload the Laravel application.
 2. Configure the production `.env`.
 3. Create the production MySQL database.
-4. Run migrations.
+4. Run production migrations.
+
+```bash
+php artisan migrate --force
+```
+
 5. Build frontend assets locally or through the hosting environment.
 6. Configure the web server document root to Laravel's `public` directory.
 7. Configure storage permissions.
 8. Run production smoke tests.
 
-Production deployment should **never expose `.env` or application source files directly through the public web root**.
+Production should **never expose `.env` or application source files directly through the public web root**.
 
 ---
 
 ## 🤝 Contributing
 
-This project is currently developed as a client-specific application.
+This project is currently developed as a client-specific application and portfolio project.
 
 For development:
 
@@ -1184,9 +1379,9 @@ Keep commits focused and avoid mixing unrelated changes.
 
 ## 📄 License
 
-This project is proprietary software developed for a specific automotive glass workshop.
+This project is proprietary software developed as a portfolio/demo project and potential foundation for a client-specific automotive glass workshop system.
 
-The license and distribution terms will be defined according to the client agreement.
+The final license and distribution terms will be defined according to the client agreement if the project is commercialized.
 
 ---
 
@@ -1203,6 +1398,9 @@ The following principles guide the implementation:
 7. **A package transaction may have one customer-facing price while still tracking the glass used internally.**
 8. **Vehicle and license plate information are essential for complaint traceability.**
 9. **Profit is calculated as revenue minus glass cost.**
-10. **The application should remain practical and suitable for shared hosting.**
-11. **Complex infrastructure should not be introduced unless the business actually requires it.**
-12. **Core workshop workflows take priority over secondary features.**
+10. **The demo and production application use the same application architecture.**
+11. **SQLite is used for development/demo, while MySQL/MariaDB is used for production.**
+12. **Demo data is generated through seeders rather than hardcoded application state.**
+13. **The application should remain practical and suitable for shared hosting.**
+14. **Complex infrastructure should not be introduced unless the business actually requires it.**
+15. **Core workshop workflows take priority over secondary features.**
