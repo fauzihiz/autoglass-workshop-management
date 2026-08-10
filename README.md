@@ -1,2 +1,1208 @@
-# autoglass-workshop-management
-Autoglass Workshop Management, Build using Laravel
+# Workshop Management System
+
+> A web-based management system for automotive glass workshops to manage customers, vehicles, glass inventory, rack locations, transactions, technicians, payments, and business insights in one place.
+
+**Status:** 🚧 In Development  
+**Version:** 0.1.0  
+**Deployment Target:** Shared Hosting
+
+---
+
+## 📸 Visual Preview
+
+> Screenshots and demo will be added as the application reaches a stable UI stage.
+
+<!-- Add screenshots or demo GIF here -->
+
+---
+
+## 📋 Table of Contents
+
+- [Core Features](#-core-features)
+- [System Concepts](#-system-concepts)
+- [Transaction Types](#-transaction-types)
+- [Inventory Management](#-inventory-management)
+- [Profit Calculation](#-profit-calculation)
+- [Tech Stack](#-tech-stack)
+- [Prerequisites](#-prerequisites)
+- [Getting Started](#-getting-started)
+- [Environment Variables](#-environment-variables)
+- [Usage Guide](#-usage-guide)
+- [Database Overview](#-database-overview)
+- [Roadmap](#-roadmap)
+- [Progress Tracker](#-progress-tracker)
+- [Testing](#-testing)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## ✨ Core Features
+
+### Customer Management
+
+- Create and manage customer records
+- Store customer contact information
+- Manage multiple vehicles belonging to one customer
+- Track customer transaction history
+- Search customers by name or contact number
+
+### Vehicle Management
+
+- Store vehicle brand and model
+- Store vehicle year when applicable
+- Store license plate number
+- Associate vehicles with customers
+- Use vehicle information for transaction and complaint traceability
+
+### Automotive Glass Catalog
+
+- Manage glass products
+- Define glass positions such as `LFW`, `FDR`, `FDL`, `RDR`, `RDL`, `RW`, etc.
+- Define compatible vehicle models
+- Support products compatible with multiple vehicle models
+- Store accessories such as sensors, shadebands, mouldings, antennas, and other attached components
+- Set minimum stock thresholds
+
+### Inventory Management
+
+- Track glass stock by product
+- Track stock by supplier lot
+- Track stock across multiple racks
+- Transfer stock between racks
+- Record stock movements
+- Perform stock opname
+- Track actual purchase cost
+- Identify low-stock and out-of-stock products
+- View rack-level stock availability
+
+### Supplier Management
+
+- Manage suppliers
+- Store supplier pricelist
+- Store supplier discount information when applicable
+- Store actual purchase price
+- Support different pricing schemes between suppliers
+- Maintain historical purchase costs through stock lots
+
+### Transaction Management
+
+Support three main transaction categories:
+
+- **Glass Sale**
+- **Glass Installation**
+- **Service Only**
+
+Transactions can contain:
+
+- Glass products
+- Services
+- Packages
+- Other charges when required
+
+A glass installation can be recorded as a single customer-facing price, for example:
+
+```text
+Front windshield installation - Avanza
+Rp950,000
+```
+
+The system can still internally trace the glass product and stock cost used for that transaction.
+
+### Payment Management
+
+- Record full payments
+- Record partial payments
+- Record unpaid transactions
+- Support multiple payments for one transaction
+- Track payment status
+- Support cash, transfer, QRIS, and other payment methods
+
+### Technician Tracking
+
+- Manage technician records
+- Assign technicians to service work
+- Track which technician performed a service
+- Trace technician information from historical transactions
+
+### Complaint Traceability
+
+Transaction history can be traced using:
+
+- Customer
+- Vehicle
+- Vehicle brand
+- Vehicle model
+- License plate
+- Transaction date
+- Glass product
+- Technician
+- Invoice number
+
+This helps prevent unsupported claims and provides a clear service history when handling customer complaints.
+
+### Price Calculator
+
+The inventory interface provides a pricing calculator for negotiation.
+
+The calculator can use:
+
+- Supplier pricelist
+- Supplier discount
+- Actual purchase cost
+- Desired customer discount
+- Desired selling price
+- Estimated profit
+
+The calculator is a **UI utility only** and does not create a separate database record.
+
+The final negotiated selling price is stored only when the transaction is confirmed.
+
+### Dashboard & Analytics
+
+The system provides insights into:
+
+- Total revenue
+- Glass-only sales
+- Glass installation revenue
+- Service-only revenue
+- Glass cost
+- Profit
+- Transaction volume
+- Best-selling glass products
+- Glass movement
+- Stock status
+- Low-stock products
+- Customer purchasing frequency
+- Top customers
+- Sales trends
+- Stock movement trends
+
+---
+
+## 🧠 System Concepts
+
+The system separates several concepts that are often incorrectly combined in a basic workshop inventory system.
+
+### Product vs. Stock
+
+A **glass product** describes what the item is.
+
+A **stock lot** describes a particular batch of that product purchased from a supplier.
+
+A **stock balance** describes where that stock is currently located.
+
+Example:
+
+```text
+Glass Product
+└── Avanza LFW
+
+    Stock Lot #001
+    ├── Supplier A
+    ├── Purchase Cost: Rp550,000
+    ├── Rack A1: 3 pcs
+    └── Rack A2: 10 pcs
+
+    Stock Lot #002
+    ├── Supplier B
+    ├── Purchase Cost: Rp650,000
+    └── Rack A3: 5 pcs
+```
+
+This structure allows the system to accurately track stock and historical cost even when the same product comes from different suppliers.
+
+---
+
+## 🚗 Product Compatibility
+
+Compatibility is managed through relationships between glass products and vehicle models.
+
+A single glass product may be compatible with multiple vehicles.
+
+Example:
+
+```text
+Glass Product:
+LFW - Product A
+
+Compatible Vehicles:
+- Honda Mobilio
+- Honda Brio
+```
+
+Another product may be:
+
+```text
+Glass Product:
+LFW - Product B
+
+Compatible Vehicles:
+- Toyota Avanza
+- Daihatsu Xenia
+```
+
+Year ranges are optional because suppliers may provide compatibility information without specific year ranges.
+
+Example:
+
+```text
+Avanza / Xenia
+```
+
+can exist without a year range.
+
+When a supplier specifies a year range:
+
+```text
+Avanza
+2015 - 2020
+```
+
+the system can store it.
+
+---
+
+## 📦 Inventory Management
+
+### Rack-Based Stock
+
+A product can exist in multiple racks.
+
+Example:
+
+```text
+Avanza LFW
+
+Rack A1 → 3 pcs
+Rack A2 → 10 pcs
+Rack A3 → 1 pcs
+
+Total → 14 pcs
+```
+
+The rack is treated as a **location**, not as part of the glass product itself.
+
+### Stock Movement
+
+Every stock change must create a stock movement.
+
+Supported movement types:
+
+```text
+IN
+OUT
+TRANSFER
+ADJUSTMENT
+```
+
+Examples:
+
+```text
+Stock In:
+Supplier A → Rack A1 → +10
+
+Transfer:
+Rack A1 → Rack A2 → 3
+
+Stock Out:
+Rack A2 → Customer Transaction → -1
+
+Adjustment:
+Stock Opname → +1 / -1
+```
+
+This creates an audit trail for inventory changes.
+
+---
+
+## ⚠️ Stock Threshold
+
+Each glass product can have a minimum stock level.
+
+Example:
+
+```text
+Product:
+Avanza LFW
+
+Current Stock:
+2
+
+Minimum Stock:
+5
+```
+
+The dashboard displays a warning because the current stock is below the configured threshold.
+
+Possible statuses:
+
+```text
+NORMAL
+LOW STOCK
+OUT OF STOCK
+```
+
+The stock dashboard will provide a dedicated warning list so staff can quickly identify products that may need to be reordered.
+
+---
+
+## 💰 Transaction Types
+
+### 1. Glass Sale
+
+Customer purchases the glass product without installation.
+
+Example:
+
+```text
+Avanza LFW
+Rp800,000
+```
+
+Transaction category:
+
+```text
+GLASS_SALE
+```
+
+---
+
+### 2. Glass Installation
+
+Customer purchases an installation package or a combined glass + installation service.
+
+Example:
+
+```text
+Front windshield installation - Avanza
+Rp950,000
+```
+
+The customer does not necessarily need to see:
+
+```text
+Glass       Rp800,000
+Installation Rp150,000
+```
+
+The system can record the customer-facing transaction as one price while internally tracking the glass product and its stock cost.
+
+Transaction category:
+
+```text
+GLASS_INSTALLATION
+```
+
+---
+
+### 3. Service Only
+
+Customer requests a service without purchasing a glass product.
+
+Example:
+
+```text
+Glass repair
+Rp200,000
+```
+
+Transaction category:
+
+```text
+SERVICE_ONLY
+```
+
+No glass cost is deducted.
+
+---
+
+## 📊 Profit Calculation
+
+The business uses a simple profit formula:
+
+```text
+Profit = Selling Price - Glass Cost
+```
+
+For a glass sale:
+
+```text
+Selling Price = Rp800,000
+Glass Cost    = Rp550,000
+
+Profit        = Rp250,000
+```
+
+For glass installation:
+
+```text
+Selling Price = Rp950,000
+Glass Cost    = Rp550,000
+
+Profit        = Rp400,000
+```
+
+For service only:
+
+```text
+Selling Price = Rp200,000
+Glass Cost    = Rp0
+
+Profit        = Rp200,000
+```
+
+### Important Business Rule
+
+The system currently does **not** deduct technician labor, installation cost, or other service-related costs from profit.
+
+Therefore:
+
+```text
+Total Profit
+=
+Total Revenue
+-
+Total Glass Cost
+```
+
+Historical glass cost is determined from the actual stock lot used in the transaction.
+
+---
+
+## 🧮 Price Calculator
+
+The price calculator is intended to help staff negotiate with customers.
+
+Example:
+
+```text
+Supplier Pricelist
+Rp1,000,000
+
+Supplier Discount
+45%
+
+Purchase Cost
+Rp550,000
+
+Customer Discount
+30%
+
+Suggested Selling Price
+Rp700,000
+
+Estimated Profit
+Rp150,000
+```
+
+The calculator does not modify the inventory or product price.
+
+When the customer agrees on a price:
+
+```text
+Final Selling Price
+Rp750,000
+```
+
+the final value is stored in the transaction.
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+
+- PHP
+- Laravel
+- Laravel Eloquent ORM
+
+### Frontend
+
+- Blade
+- Livewire
+- Alpine.js
+- Tailwind CSS
+
+### Database
+
+- MySQL / MariaDB
+
+### Development Tools
+
+- Git
+- GitHub
+- Composer
+- npm
+- Vite
+
+### Deployment
+
+- Shared hosting
+- Apache / PHP
+- MySQL / MariaDB
+
+The architecture intentionally avoids infrastructure requirements such as Redis, workers, or VPS-only services for the initial version.
+
+---
+
+## 📋 Prerequisites
+
+Before running the project locally, make sure you have:
+
+- PHP with the version required by the selected Laravel version
+- Composer
+- Node.js and npm
+- MySQL or MariaDB
+- Git
+
+Verify your environment:
+
+```bash
+php -v
+composer -V
+node -v
+npm -v
+git --version
+```
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd <project-directory>
+```
+
+### 2. Install PHP Dependencies
+
+```bash
+composer install
+```
+
+### 3. Install Frontend Dependencies
+
+```bash
+npm install
+```
+
+### 4. Create Environment File
+
+```bash
+cp .env.example .env
+```
+
+On Windows:
+
+```powershell
+copy .env.example .env
+```
+
+### 5. Generate Application Key
+
+```bash
+php artisan key:generate
+```
+
+### 6. Configure the Database
+
+Create a MySQL database and update the database variables in `.env`.
+
+### 7. Run Migrations
+
+```bash
+php artisan migrate
+```
+
+### 8. Seed Development Data
+
+```bash
+php artisan db:seed
+```
+
+### 9. Build Frontend Assets
+
+```bash
+npm run build
+```
+
+### 10. Start the Development Server
+
+```bash
+php artisan serve
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8000
+```
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` file based on `.env.example`.
+
+Example:
+
+```env
+APP_NAME="Workshop Management System"
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=workshop_management
+DB_USERNAME=root
+DB_PASSWORD=
+
+```
+
+Never commit `.env` or real credentials to the repository.
+
+---
+
+## 🖥️ Usage Guide
+
+### Check Glass Availability
+
+1. Open the inventory dashboard.
+2. Search for the vehicle or glass product.
+3. Select the required glass position.
+4. Review compatible vehicles.
+5. Check current stock.
+6. Review rack locations.
+7. Review supplier and purchase cost information.
+8. Use the price calculator when negotiating with the customer.
+
+Example:
+
+```text
+Vehicle:
+Toyota Avanza
+
+Position:
+LFW
+
+Stock:
+14 pcs
+
+Locations:
+A1 → 3
+A2 → 10
+A3 → 1
+```
+
+---
+
+### Create a Glass Sale
+
+```text
+Customer
+    ↓
+Select Glass
+    ↓
+Check Stock
+    ↓
+Select Stock Allocation
+    ↓
+Enter Final Selling Price
+    ↓
+Payment
+    ↓
+Confirm Transaction
+    ↓
+Stock OUT
+    ↓
+Invoice
+```
+
+---
+
+### Create a Glass Installation
+
+```text
+Customer
+    ↓
+Select Vehicle
+    ↓
+Select Glass
+    ↓
+Select Stock
+    ↓
+Assign Technician
+    ↓
+Enter Final Package Price
+    ↓
+Payment
+    ↓
+Confirm Transaction
+    ↓
+Stock OUT
+    ↓
+Save Service Record
+    ↓
+Invoice
+```
+
+---
+
+### Create a Service-Only Transaction
+
+```text
+Customer
+    ↓
+Select Vehicle
+    ↓
+Select Service
+    ↓
+Assign Technician
+    ↓
+Enter Price
+    ↓
+Payment
+    ↓
+Confirm Transaction
+    ↓
+Invoice
+```
+
+No glass stock is deducted.
+
+---
+
+## 🗄️ Database Overview
+
+Main entities:
+
+```text
+customers
+    └── vehicles
+
+car_brands
+    └── car_models
+
+glass_positions
+
+glass_products
+    ├── product_compatibilities
+    ├── product_accessories
+    └── stock_lots
+            ├── stock_balances
+            │       └── racks
+            └── stock_movements
+
+suppliers
+
+accessories
+
+services
+
+transactions
+    ├── transaction_items
+    │       ├── stock_allocations
+    │       └── service_assignments
+    │               └── technicians
+    │
+    └── payments
+
+stock_opnames
+    └── stock_opname_items
+```
+
+### Core Relationship
+
+```text
+Customer
+   │
+   └── Vehicles
+          │
+          └── Transactions
+                 │
+                 ├── Transaction Items
+                 │       ├── Glass
+                 │       ├── Service
+                 │       └── Package
+                 │
+                 ├── Payments
+                 │
+                 └── Service Assignments
+                         │
+                         └── Technician
+```
+
+---
+
+# 🗺️ Roadmap
+
+## Phase 1 — Project Foundation
+
+**Goal:** Establish the Laravel application and database foundation.
+
+- [ ] Initialize Laravel project
+- [ ] Configure MySQL
+- [ ] Configure environment
+- [ ] Set up Git repository
+- [ ] Set up base layout
+- [ ] Install and configure Livewire
+- [ ] Install and configure Tailwind CSS
+- [ ] Establish application conventions
+- [ ] Create initial database migrations
+
+---
+
+## Phase 2 — Master Data
+
+**Goal:** Build all foundational data management.
+
+- [ ] Customer CRUD
+- [ ] Vehicle CRUD
+- [ ] Technician CRUD
+- [ ] Supplier CRUD
+- [ ] Car brand CRUD
+- [ ] Car model CRUD
+- [ ] Glass position CRUD
+- [ ] Glass product CRUD
+- [ ] Product compatibility management
+- [ ] Accessory CRUD
+- [ ] Product-accessory management
+- [ ] Service CRUD
+- [ ] Rack CRUD
+
+---
+
+## Phase 3 — Inventory Management
+
+**Goal:** Build reliable multi-rack and supplier-lot inventory.
+
+- [ ] Stock lot management
+- [ ] Supplier purchase information
+- [ ] Actual purchase cost tracking
+- [ ] Stock balance management
+- [ ] Multi-rack stock support
+- [ ] Stock-in workflow
+- [ ] Stock transfer workflow
+- [ ] Stock-out workflow
+- [ ] Stock movement history
+- [ ] Minimum stock configuration
+- [ ] Low-stock warnings
+- [ ] Out-of-stock warnings
+- [ ] Stock opname
+- [ ] Stock adjustment
+- [ ] Inventory search and filtering
+
+---
+
+## Phase 4 — Transaction Management
+
+**Goal:** Build the complete sales and service workflow.
+
+- [ ] Customer selection
+- [ ] Vehicle selection
+- [ ] Glass availability lookup
+- [ ] Rack availability display
+- [ ] Price calculator
+- [ ] Glass sale transaction
+- [ ] Glass installation transaction
+- [ ] Service-only transaction
+- [ ] Flexible package pricing
+- [ ] Stock allocation
+- [ ] Technician assignment
+- [ ] Payment recording
+- [ ] Partial payment support
+- [ ] Payment status
+- [ ] Transaction confirmation
+- [ ] Invoice generation
+- [ ] Invoice printing
+
+---
+
+## Phase 5 — Transaction & Complaint History
+
+**Goal:** Make every completed job traceable.
+
+- [ ] Transaction history
+- [ ] Transaction detail
+- [ ] Customer history
+- [ ] Vehicle history
+- [ ] Technician service history
+- [ ] Glass product history
+- [ ] Stock lot traceability
+- [ ] Invoice history
+- [ ] Payment history
+- [ ] Complaint lookup workflow
+
+---
+
+## Phase 6 — Dashboard & Analytics
+
+**Goal:** Turn operational data into useful business insights.
+
+- [ ] Overview dashboard
+- [ ] Revenue summary
+- [ ] Glass sales summary
+- [ ] Glass installation summary
+- [ ] Service-only summary
+- [ ] Glass cost summary
+- [ ] Profit summary
+- [ ] Sales trend chart
+- [ ] Best-selling glass
+- [ ] Glass movement analysis
+- [ ] Customer ranking
+- [ ] Purchase frequency analysis
+- [ ] Stock alert dashboard
+- [ ] Fast-moving products
+- [ ] Slow-moving products
+- [ ] Stock value overview
+
+---
+
+## Phase 7 — Production Hardening
+
+**Goal:** Prepare the application for real workshop usage.
+
+- [ ] Form validation review
+- [ ] Authorization architecture preparation
+- [ ] Database indexing
+- [ ] Error handling
+- [ ] Transaction rollback testing
+- [ ] Stock consistency testing
+- [ ] Invoice testing
+- [ ] Backup strategy
+- [ ] Production environment configuration
+- [ ] Shared hosting deployment
+- [ ] Production smoke testing
+
+---
+
+## 🔐 Phase 8 — Authentication & Roles
+
+> Planned after the core workflow is stable.
+
+Potential roles:
+
+```text
+Admin
+Manager
+Inventory Staff
+Cashier
+Technician
+```
+
+Potential permissions:
+
+```text
+Inventory Management
+Transaction Management
+Customer Management
+Technician Management
+Reports
+Analytics
+Settings
+```
+
+Authentication is intentionally excluded from the initial development scope so the core business workflow can be completed first.
+
+---
+
+# 📈 Progress Tracker
+
+### Overall Progress
+
+```text
+Foundation          ░░░░░░░░░░  0%
+Master Data         ░░░░░░░░░░  0%
+Inventory           ░░░░░░░░░░  0%
+Transactions        ░░░░░░░░░░  0%
+History & Complaint ░░░░░░░░░░  0%
+Analytics           ░░░░░░░░░░  0%
+Production          ░░░░░░░░░░  0%
+Authentication      ░░░░░░░░░░  0%
+```
+
+> Progress percentages should be updated as features are completed.
+
+### Detailed Tracker
+
+| Phase | Feature | Status |
+|---|---|---|
+| Foundation | Laravel setup | ⬜ |
+| Foundation | Database configuration | ⬜ |
+| Foundation | Base UI layout | ⬜ |
+| Foundation | Livewire setup | ⬜ |
+| Foundation | Tailwind setup | ⬜ |
+| Master Data | Customer management | ⬜ |
+| Master Data | Vehicle management | ⬜ |
+| Master Data | Technician management | ⬜ |
+| Master Data | Supplier management | ⬜ |
+| Master Data | Car brand management | ⬜ |
+| Master Data | Car model management | ⬜ |
+| Master Data | Glass position management | ⬜ |
+| Master Data | Glass product management | ⬜ |
+| Master Data | Compatibility management | ⬜ |
+| Master Data | Accessory management | ⬜ |
+| Master Data | Service management | ⬜ |
+| Master Data | Rack management | ⬜ |
+| Inventory | Stock lot management | ⬜ |
+| Inventory | Stock-in | ⬜ |
+| Inventory | Multi-rack stock | ⬜ |
+| Inventory | Stock transfer | ⬜ |
+| Inventory | Stock movement | ⬜ |
+| Inventory | Stock opname | ⬜ |
+| Inventory | Minimum stock | ⬜ |
+| Inventory | Low-stock warning | ⬜ |
+| Transactions | Glass sale | ⬜ |
+| Transactions | Glass installation | ⬜ |
+| Transactions | Service only | ⬜ |
+| Transactions | Package pricing | ⬜ |
+| Transactions | Price calculator | ⬜ |
+| Transactions | Stock allocation | ⬜ |
+| Transactions | Technician assignment | ⬜ |
+| Transactions | Payment management | ⬜ |
+| Transactions | Invoice | ⬜ |
+| History | Transaction history | ⬜ |
+| History | Vehicle history | ⬜ |
+| History | Technician history | ⬜ |
+| History | Complaint traceability | ⬜ |
+| Analytics | Revenue dashboard | ⬜ |
+| Analytics | Profit dashboard | ⬜ |
+| Analytics | Glass sales analytics | ⬜ |
+| Analytics | Installation analytics | ⬜ |
+| Analytics | Customer analytics | ⬜ |
+| Analytics | Stock analytics | ⬜ |
+| Production | Validation review | ⬜ |
+| Production | Error handling | ⬜ |
+| Production | Testing | ⬜ |
+| Production | Deployment | ⬜ |
+| Authentication | Login | ⬜ |
+| Authentication | Roles & permissions | ⬜ |
+
+### Status Legend
+
+```text
+⬜ Not Started
+🟡 In Progress
+🟢 Completed
+🔴 Blocked
+```
+
+---
+
+## 🧪 Running Tests
+
+Run the Laravel test suite with:
+
+```bash
+php artisan test
+```
+
+For a specific test:
+
+```bash
+php artisan test --filter=TestName
+```
+
+Important test areas include:
+
+- Stock calculation
+- Stock transfer
+- Stock opname
+- Stock allocation
+- Transaction creation
+- Transaction rollback
+- Payment calculation
+- Profit calculation
+- Minimum stock warnings
+- Product compatibility
+- Complaint traceability
+
+---
+
+## 🚢 Deployment
+
+The initial production environment is designed for **shared hosting**.
+
+The deployment process will generally include:
+
+1. Upload the Laravel application.
+2. Configure the production `.env`.
+3. Create the production MySQL database.
+4. Run migrations.
+5. Build frontend assets locally or through the hosting environment.
+6. Configure the web server document root to Laravel's `public` directory.
+7. Configure storage permissions.
+8. Run production smoke tests.
+
+Production deployment should **never expose `.env` or application source files directly through the public web root**.
+
+---
+
+## 🤝 Contributing
+
+This project is currently developed as a client-specific application.
+
+For development:
+
+1. Create a feature branch.
+
+```bash
+git checkout -b feature/your-feature
+```
+
+2. Implement the feature.
+3. Run tests.
+
+```bash
+php artisan test
+```
+
+4. Review migrations and database changes.
+5. Commit the changes.
+
+```bash
+git add .
+git commit -m "feat: add your feature"
+```
+
+6. Push the branch.
+
+```bash
+git push origin feature/your-feature
+```
+
+Keep commits focused and avoid mixing unrelated changes.
+
+---
+
+## 📄 License
+
+This project is proprietary software developed for a specific automotive glass workshop.
+
+The license and distribution terms will be defined according to the client agreement.
+
+---
+
+## 📌 Project Principles
+
+The following principles guide the implementation:
+
+1. **Inventory accuracy comes first.**
+2. **Every stock change must be traceable.**
+3. **Historical transaction data must not depend on current product prices.**
+4. **Actual purchase cost comes from the stock lot used.**
+5. **Customer-facing pricing must remain flexible.**
+6. **The price calculator is a negotiation tool, not an inventory record.**
+7. **A package transaction may have one customer-facing price while still tracking the glass used internally.**
+8. **Vehicle and license plate information are essential for complaint traceability.**
+9. **Profit is calculated as revenue minus glass cost.**
+10. **The application should remain practical and suitable for shared hosting.**
+11. **Complex infrastructure should not be introduced unless the business actually requires it.**
+12. **Core workshop workflows take priority over secondary features.**
