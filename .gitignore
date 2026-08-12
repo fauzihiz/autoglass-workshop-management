@@ -28,3 +28,13 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+# AI Agent files (personal use)
+AGENTS.md
+agent.md
+.cliderules
+.cursorrules
+.cursorignore
+.windsurfrules
+.ai/
+*.agent.md

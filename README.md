@@ -4,7 +4,7 @@
 
 **Status:** 🚧 In Development
 **Version:** 0.2.0
-**Deployment Target:** Shared Hosting
+**Deployment Target:** Render (Docker) + Supabase PostgreSQL
 
 ---
 
@@ -535,9 +535,10 @@ The calculator itself does not modify the product price, inventory, supplier dat
 
 * SQLite
 
-**Production / Client**
+**Production / Portfolio Demo**
 
-* MySQL / MariaDB
+* Supabase PostgreSQL (Session mode pooler)
+* Fully PostgreSQL compatible — all migrations use standard Laravel Schema
 
 ### Development Tools
 
@@ -549,9 +550,9 @@ The calculator itself does not modify the product price, inventory, supplier dat
 
 ### Deployment
 
-* Shared hosting
-* Apache / PHP
-* MySQL / MariaDB
+* Render Web Service (Docker)
+* Supabase PostgreSQL (Session mode pooler)
+* PHP 8.3 CLI
 
 The application is intentionally designed to avoid infrastructure requirements such as Redis, dedicated queue workers, or VPS-only services for the initial version.
 
@@ -686,21 +687,23 @@ database/database.sqlite
 
 ### Production
 
-For a real client deployment, configure MySQL or MariaDB:
+For the portfolio demo deployment, configure Supabase PostgreSQL:
 
 ```env
 APP_ENV=production
 APP_DEBUG=false
 
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=workshop_management
-DB_USERNAME=your_database_user
-DB_PASSWORD=your_database_password
+DB_CONNECTION=pgsql
+DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+DB_PORT=6543
+DB_DATABASE=postgres
+DB_USERNAME=postgres.<your-project-ref>
+DB_PASSWORD=your_supabase_password
 ```
 
-The application code does not need to be rewritten when switching between SQLite and MySQL/MariaDB.
+> **Note:** Supabase provides two connection modes. Use **Session mode** (port `6543`) for web requests where connections are short-lived. Use **Transaction mode** (port `5432`) for long-running processes.
+
+The application code does not need to be rewritten when switching between SQLite and PostgreSQL.
 
 Never commit `.env` or real credentials to the repository.
 
@@ -715,7 +718,7 @@ This project is designed to serve two purposes:
 
 The application therefore uses the same Laravel application architecture in both environments.
 
-### Demo
+### Local Development
 
 ```text
 Laravel
@@ -726,21 +729,23 @@ SQLite
    ↓
 Seeded Demo Data
    ↓
-Demo Application
+Development Server
 ```
 
-### Production
+### Portfolio Demo (Deployed)
 
 ```text
-Laravel
+GitHub Push
    ↓
-Eloquent
+Render Docker Build
    ↓
-MySQL / MariaDB
+Laravel + PHP 8.3 CLI
    ↓
-Real Workshop Data
+Supabase PostgreSQL
    ↓
-Client Application
+Seeded Demo Data
+   ↓
+Live Demo Application
 ```
 
 The goal is to avoid building a separate "fake demo application".
@@ -1302,41 +1307,96 @@ Important test areas include:
 * Product compatibility
 * Complaint traceability
 * SQLite development behavior
-* MySQL production compatibility
+* PostgreSQL production compatibility
 
 ---
 
 ## 🚢 Deployment
 
-The initial production environment is designed for **shared hosting**.
+The portfolio demo is deployed on **Render** using Docker, with **Supabase PostgreSQL** as the production database.
+
+### Architecture
+
+```text
+GitHub (main branch)
+   ↓ (auto deploy)
+Render Web Service (Docker)
+   ├── Dockerfile builds PHP 8.3 CLI + Node.js 22
+   ├── composer install --no-dev
+   ├── npm install && npm run build
+   └── php artisan serve --host=0.0.0.0 --port=$PORT
+          ↓
+Supabase PostgreSQL (Session mode pooler)
+          ↓
+Live Demo Application
+```
 
 ### Production Database
 
-Production should use:
+Supabase PostgreSQL (Session mode pooler):
 
 ```text
-MySQL / MariaDB
+DB_CONNECTION=pgsql
+DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+DB_PORT=6543
+DB_DATABASE=postgres
+DB_USERNAME=postgres.<your-project-ref>
+DB_PASSWORD=<your-password>
 ```
-
-Configure the production `.env` with the database credentials provided by the hosting provider.
 
 ### Deployment Steps
 
-1. Upload the Laravel application.
-2. Configure the production `.env`.
-3. Create the production MySQL database.
-4. Run production migrations.
+1. **Create a Supabase project** at [supabase.com](https://supabase.com) and note the pooler connection details.
 
-```bash
-php artisan migrate --force
-```
+2. **Create a Render Web Service:**
+   * Connect your GitHub repository.
+   * Select **Docker** as the runtime.
+   * Set the Dockerfile path to `Dockerfile` (repo root).
+   * Set the build context directory if needed.
 
-5. Build frontend assets locally or through the hosting environment.
-6. Configure the web server document root to Laravel's `public` directory.
-7. Configure storage permissions.
-8. Run production smoke tests.
+3. **Configure environment variables** in Render:
+
+   ```text
+   APP_NAME="Workshop Management System"
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_KEY=<generated-key>
+   APP_URL=https://your-app.onrender.com
+
+   DB_CONNECTION=pgsql
+   DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+   DB_PORT=6543
+   DB_DATABASE=postgres
+   DB_USERNAME=postgres.<your-project-ref>
+   DB_PASSWORD=<your-supabase-password>
+
+   SESSION_DRIVER=database
+   CACHE_STORE=database
+   QUEUE_CONNECTION=database
+   ```
+
+4. **Configure pre-deploy command** in Render:
+
+   ```bash
+   php artisan migrate --force && php artisan db:seed --force
+   ```
+
+   This runs migrations and seeds demo data on every deploy.
+
+5. **Deploy** — push to `main` branch to trigger a build.
+
+6. **Run production smoke tests:**
+   * Verify the application loads at the Render URL.
+   * Check that demo data is visible on the dashboard.
+   * Verify inventory, transactions, and analytics pages work.
 
 Production should **never expose `.env` or application source files directly through the public web root**.
+
+### Render Notes
+
+* Render provides **HTTPS termination** — the container runs `php artisan serve` on port 8000, and Render handles SSL externally.
+* Render's **free tier** spins down after inactivity — first request may take 30-60 seconds.
+* Seed data persists in Supabase across redeploys because `migrate --force` does not drop tables.
 
 ---
 
@@ -1399,8 +1459,8 @@ The following principles guide the implementation:
 8. **Vehicle and license plate information are essential for complaint traceability.**
 9. **Profit is calculated as revenue minus glass cost.**
 10. **The demo and production application use the same application architecture.**
-11. **SQLite is used for development/demo, while MySQL/MariaDB is used for production.**
+11. **SQLite is used for development/demo, while PostgreSQL (Supabase) is used for production.**
 12. **Demo data is generated through seeders rather than hardcoded application state.**
-13. **The application should remain practical and suitable for shared hosting.**
+13. **The application should remain practical and deployable on modern cloud platforms.**
 14. **Complex infrastructure should not be introduced unless the business actually requires it.**
 15. **Core workshop workflows take priority over secondary features.**

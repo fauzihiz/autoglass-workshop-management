@@ -1,0 +1,41 @@
+# Dependencies (reinstall in Docker for reproducible builds)
+awm/node_modules
+awm/vendor
+
+# Environment and secrets
+awm/.env
+awm/.env.backup
+awm/.env.production
+
+# Build artifacts
+awm/public/build
+awm/public/hot
+awm/storage/framework/cache/*
+awm/storage/framework/sessions/*
+awm/storage/framework/views/*
+awm/storage/logs/*
+awm/storage/pail
+awm/bootstrap/cache/*
+
+# Development files
+awm/.phpunit.cache
+awm/.phpunit.result.cache
+awm/.phpactor.json
+awm/.fleet
+awm/.idea
+awm/.nova
+awm/.vscode
+awm/.zed
+awm/phpstan.neon
+
+# Git and documentation
+.git
+.gitignore
+README.md
+CONVENTIONS.md
+LICENSE
+
+# Docker (prevent recursive copy)
+Dockerfile
+.dockerignore
+render.yaml

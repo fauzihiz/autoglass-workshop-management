@@ -22,3 +22,13 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# AI Agent files (personal use)
+AGENTS.md
+agent.md
+.cliderules
+.cursorrules
+.cursorignore
+.windsurfrules
+.ai/
+*.agent.md
