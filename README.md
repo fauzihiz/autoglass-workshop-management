@@ -3,7 +3,7 @@
 > A web-based management system for automotive glass workshops to manage customers, vehicles, glass inventory, rack locations, transactions, technicians, payments, and business insights in one place.
 
 **Status:** 🚧 In Development
-**Version:** 0.2.0
+**Version:** 0.3.0
 **Deployment Target:** Render (Docker) + Supabase PostgreSQL
 
 ---
@@ -1043,19 +1043,19 @@ Customer
 
 **Goal:** Build all foundational data management.
 
-* [ ] Customer CRUD
-* [ ] Vehicle CRUD
-* [ ] Technician CRUD
-* [ ] Supplier CRUD
-* [ ] Car brand CRUD
-* [ ] Car model CRUD
-* [ ] Glass position CRUD
-* [ ] Glass product CRUD
-* [ ] Product compatibility management
-* [ ] Accessory CRUD
-* [ ] Product-accessory management
-* [ ] Service CRUD
-* [ ] Rack CRUD
+* [x] Customer CRUD
+* [x] Vehicle CRUD
+* [x] Technician CRUD
+* [x] Supplier CRUD
+* [x] Car brand CRUD
+* [x] Car model CRUD
+* [x] Glass position CRUD
+* [x] Glass product CRUD
+* [x] Product compatibility management
+* [x] Accessory CRUD
+* [x] Product-accessory management
+* [x] Service CRUD
+* [x] Rack CRUD
 
 ---
 
@@ -1201,7 +1201,7 @@ Authentication is intentionally excluded from the initial development scope so t
 
 ```text
 Foundation          ██████████ 100%
-Master Data         ░░░░░░░░░░   0%
+Master Data         ██████████ 100%
 Inventory           ░░░░░░░░░░   0%
 Transactions        ░░░░░░░░░░   0%
 History & Complaint ░░░░░░░░░░   0%
@@ -1225,18 +1225,19 @@ Authentication      ░░░░░░░░░░   0%
 | Foundation     | Database migrations            | 🟢      |
 | Foundation     | Demo seeders                   | 🟢      |
 | Foundation     | Docker deployment              | 🟢      |
-| Master Data    | Customer management            | ⬜      |
-| Master Data    | Vehicle management             | ⬜      |
-| Master Data    | Technician management          | ⬜      |
-| Master Data    | Supplier management            | ⬜      |
-| Master Data    | Car brand management           | ⬜      |
-| Master Data    | Car model management           | ⬜      |
-| Master Data    | Glass position management      | ⬜      |
-| Master Data    | Glass product management       | ⬜      |
-| Master Data    | Compatibility management       | ⬜      |
-| Master Data    | Accessory management           | ⬜      |
-| Master Data    | Service management             | ⬜      |
-| Master Data    | Rack management                | ⬜      |
+| Master Data    | Customer management            | 🟢      |
+| Master Data    | Vehicle management             | 🟢      |
+| Master Data    | Technician management          | 🟢      |
+| Master Data    | Supplier management            | 🟢      |
+| Master Data    | Car brand management           | 🟢      |
+| Master Data    | Car model management           | 🟢      |
+| Master Data    | Glass position management      | 🟢      |
+| Master Data    | Glass product management       | 🟢      |
+| Master Data    | Compatibility management       | 🟢      |
+| Master Data    | Accessory management           | 🟢      |
+| Master Data    | Product-accessory management   | 🟢      |
+| Master Data    | Service management             | 🟢      |
+| Master Data    | Rack management                | 🟢      |
 | Inventory      | Stock lot management           | ⬜      |
 | Inventory      | Stock-in                       | ⬜      |
 | Inventory      | Multi-rack stock               | ⬜      |
