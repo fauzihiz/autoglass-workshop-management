@@ -1,646 +1,618 @@
-# Application Conventions — Learning Guide
+# Application Conventions
 
-> **Purpose:** This document explains the architectural decisions you need to make before Phase 2 begins. Each section describes what it is, the available options with pros/cons, and links to official documentation. Read through each section, learn the trade-offs, and then we'll finalize the decisions together.
+> **Purpose:** This document defines the finalized architectural decisions, coding conventions, and project standards for the Autoglass Workshop Management System. All developers and AI agents working on this codebase must follow these conventions.
 
 ---
 
 ## Table of Contents
 
-1. [Authentication](#1-authentication)
-2. [CRUD Approach](#2-crud-approach)
-3. [Roles & Permission Management](#3-roles--permission-management)
-4. [Service / Action / DTO Layer](#4-service--action--dto-layer)
-5. [Livewire Component Structure](#5-livewire-component-structure)
-6. [Blade Component Patterns](#6-blade-component-patterns)
-7. [Frontend Stack](#7-frontend-stack)
-8. [CSS / UI Framework](#8-css--ui-framework)
+1. [Project Overview](#1-project-overview)
+2. [Architecture](#2-architecture)
+3. [Database Strategy](#3-database-strategy)
+4. [Deployment](#4-deployment)
+5. [Model Conventions](#5-model-conventions)
+6. [Enum Conventions](#6-enum-conventions)
+7. [Migration Conventions](#7-migration-conventions)
+8. [Seeder Conventions](#8-seeder-conventions)
 9. [Naming Conventions](#9-naming-conventions)
-10. [Database Conventions](#10-database-conventions)
-11. [Testing Strategy](#11-testing-strategy)
-12. [File Organization](#12-file-organization)
-13. [Filament Panel Configuration](#13-filament-panel-configuration)
+10. [Livewire Conventions](#10-livewire-conventions)
+11. [Blade Conventions](#11-blade-conventions)
+12. [Testing Conventions](#12-testing-conventions)
+13. [Code Style](#13-code-style)
+14. [Project Principles](#14-project-principles)
 
 ---
 
-## 1. Authentication
+## 1. Project Overview
 
-### What is it?
-Authentication handles **who can log in** to the system. It manages login forms, session handling, password resets, and "remember me" functionality.
+A web-based management system for automotive glass workshops to manage customers, vehicles, glass inventory, rack locations, transactions, technicians, payments, and business insights.
 
-### Options
+### Tech Stack
 
-#### A. Filament Default Auth (Recommended for Filament projects)
-Filament ships its own authentication system. When you create a Filament panel, it automatically includes login, password reset, and email verification pages.
+| Layer | Technology |
+|-------|-----------|
+| Backend | PHP 8.3, Laravel 13 |
+| ORM | Eloquent |
+| Frontend | Blade, Livewire 4, Alpine.js, Tailwind CSS |
+| Build Tool | Vite |
+| Testing | Pest |
+| Local Database | SQLite |
+| Production Database | Supabase PostgreSQL |
+| Deployment | Render (Docker) |
+| Version Control | Git + GitHub |
 
-- **Pros:** Zero setup, integrated with Filament panel, includes login/password-reset/email-verification
-- **Cons:** Only covers Filament panel pages — doesn't protect your custom Blade routes (e.g., the current dashboard)
-- **Docs:** https://filamentphp.com/docs/3.x authentication
+### Key Packages
 
-#### B. Laravel Breeze
-A minimal authentication scaffolding. Provides login, register, password reset, email verification, and a basic dashboard.
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `laravel/framework` | ^13.17 | Core framework |
+| `livewire/livewire` | ^4.1 | Server-driven UI |
+| `livewire/blaze` | ^1.0 | Livewire starter kit |
+| `pestphp/pest` | ^5.0 | Testing framework |
+| `laravel/pint` | ^1.27 | Code formatting |
 
-- **Pros:** Full auth system for all routes, simple and lightweight, first-party Laravel package
-- **Cons:** Includes registration by default (you may not want public registration), adds extra views/routes
-- **Docs:** https://laravel.com/docs/12.x/starter-kits#laravel-breeze
-
-#### C. Laravel Fortify
-A headless authentication backend (no views). Handles login, registration, password reset via API/actions. You build your own UI.
-
-- **Pros:** Flexible, no opinionated UI, full control
-- **Cons:** More work to set up, you must build all the views yourself
-- **Docs:** https://laravel.com/docs/12.x/fortify
-
-#### D. Custom Authentication
-Build your own using Laravel's Auth facade, middleware, and guards.
-
-- **Pros:** Complete control
-- **Cons:** Most work, easy to make security mistakes, reinventing the wheel
-- **Docs:** https://laravel.com/docs/12.x/authentication
-
-### Recommendation
-Since we're using **Filament for the admin panel**, Filament's built-in auth handles admin login. For the custom dashboard (non-Filament Blade pages), we'll likely need **Laravel Breeze** or simple auth middleware.
+> Always confirm package versions with `composer show --direct` or `package.json` before using a package's API.
 
 ---
 
-## 2. CRUD Approach
+## 2. Architecture
 
-### What is it?
-CRUD (Create, Read, Update, Delete) is how you build the data management screens — forms for creating/editing records, tables for listing them, modals for viewing details.
+### Application Structure
 
-### Options
+```text
+awm/
+├── app/
+│   ├── Enums/              # Backed string enums (TransactionType, PaymentMethod, etc.)
+│   ├── Livewire/           # Livewire full-page components
+│   ├── Models/             # Eloquent models with SoftDeletes
+│   └── Providers/          # Service providers
+├── database/
+│   ├── migrations/         # Timestamped migrations (anonymous classes)
+│   └── seeders/            # Indonesian workshop demo data
+├── resources/
+│   └── views/
+│       ├── components/     # Anonymous Blade components
+│       ├── layouts/        # app.blade.php, sidebar.blade.php
+│       └── livewire/       # Livewire component views
+├── routes/
+│   └── web.php             # Web routes (named routes)
+├── tests/                  # Pest feature and unit tests
+├── public/                 # Public assets (Vite build output)
+├── storage/                # Logs, cache, sessions
+└── bootstrap/              # Application bootstrap
+```
 
-#### A. Filament PHP (Recommended)
-A full admin panel builder for Laravel. You define "Resource" classes that describe your models, and Filament generates the entire UI.
+### Architectural Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Admin Panel | Custom Blade + Livewire (no Filament) | Full control over UI, matches workshop workflows |
+| CRUD Approach | Livewire full-page components | Consistent with existing dashboard pattern |
+| Business Logic | Service classes grouped by domain | Testable, organized, without over-engineering |
+| Authentication | Deferred to Phase 8 | Core business workflow takes priority |
+| Roles & Permissions | Deferred to Phase 8 | Will use Spatie Laravel Permission when needed |
+| Frontend Framework | Alpine.js for client-side only | Lightweight, sufficient for modal/dropdown/tabs |
+
+### Service Layer (Planned)
+
+When Phase 2+ adds business logic, use service classes:
+
+```text
+app/Services/
+├── TransactionService.php     # Transaction creation, confirmation, rollback
+├── InventoryService.php       # Stock-in, stock-out, transfer, opname
+├── CustomerService.php        # Customer management logic
+└── PaymentService.php         # Payment recording, partial payments
+```
+
+Rules:
+- One service per domain
+- Services injected via constructor (Laravel container)
+- Keep methods focused — split into Action classes if a method exceeds ~30 lines
+
+---
+
+## 3. Database Strategy
+
+### Environment Mapping
+
+| Environment | Database | Connection String | Purpose |
+|-------------|----------|-------------------|---------|
+| Development / Demo | SQLite | `database/database.sqlite` | Local dev, `migrate:fresh --seed` safe |
+| Production (Portfolio Demo) | Supabase PostgreSQL | `pgsql://...pooler.supabase.com:6543/postgres` | Live demo, data preserved across deploys |
+
+### Supabase Connection Details
+
+```text
+DB_CONNECTION=pgsql
+DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+DB_PORT=6543              # Session mode (web requests)
+DB_DATABASE=postgres
+DB_USERNAME=postgres.<project-ref>
+DB_PASSWORD=<password>
+```
+
+> **Session mode (port 6543)** for web requests. **Transaction mode (port 5432)** for long-running processes.
+
+### Migration Rules
+
+1. **Use standard Laravel Schema builder only** — no raw SQL, no database-specific functions
+2. **All migrations must be PostgreSQL compatible** — verified against Supabase
+3. **No SQLite-specific syntax** in migrations (e.g., no `DB::statement()` with SQLite pragmas)
+4. **Use `foreignId()->constrained()->cascadeOnDelete()`** for foreign keys
+5. **Use `timestamps()` and `softDeletes()`** on all core business tables
+6. **Anonymous class pattern** for all new migrations:
 
 ```php
-// Example: Filament Resource
-class CustomerResource extends Resource
+return new class extends Migration
 {
-    protected static ?string $model = Customer::class;
-    protected static ?string $navigationIcon = 'heroicon-o-users';
-
-    public static function table(Table $table): Table
+    public function up(): void
     {
-        return $table->columns([
-            TextColumn::make('name')->searchable(),
-            TextColumn::make('phone'),
-        ]);
+        Schema::create('table_name', function (Blueprint $table) {
+            $table->id();
+            // columns...
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    public static function form(Form $form): Form
+    public function down(): void
     {
-        return $form->schema([
-            TextInput::make('name')->required(),
-            TextInput::make('phone'),
-        ]);
+        Schema::dropIfExists('table_name');
+    }
+};
+```
+
+---
+
+## 4. Deployment
+
+### Render + Docker Architecture
+
+```text
+GitHub (main branch)
+   ↓ (auto deploy)
+Render Web Service (Docker)
+   ├── Multi-stage Dockerfile (repo root)
+   │   ├── Stage 1: php:8.3-cli builder
+   │   │   ├── Composer install --no-dev
+   │   │   ├── npm ci && npm run build
+   │   │   └── Laravel optimize (config/route/view cache)
+   │   └── Stage 2: php:8.3-cli runtime
+   │       ├── Copy built app from builder
+   │       └── CMD: migrate --force && artisan serve
+   └── Port 8000 (Render handles HTTPS)
+          ↓
+Supabase PostgreSQL (Session mode pooler)
+          ↓
+Live Demo Application
+```
+
+### Pre-Deploy Command
+
+```bash
+php artisan migrate --force && php artisan db:seed --force
+```
+
+- `migrate --force` runs pending migrations without confirmation
+- `db:seed --force` re-seeds demo data (seeders handle duplicates gracefully)
+- Seed data persists in Supabase across redeploys because migrations don't drop tables
+
+### Render Environment Variables
+
+```text
+APP_NAME="Workshop Management System"
+APP_ENV=production
+APP_DEBUG=false
+APP_KEY=<generated>
+APP_URL=https://your-app.onrender.com
+
+DB_CONNECTION=pgsql
+DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+DB_PORT=6543
+DB_DATABASE=postgres
+DB_USERNAME=postgres.<project-ref>
+DB_PASSWORD=<password>
+
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+```
+
+### Render Notes
+
+- Render's **free tier** spins down after inactivity — first request may take 30-60 seconds
+- **HTTPS termination** is handled by Render — the container only exposes HTTP on port 8000
+- Seed data persists because `migrate --force` does not drop existing tables
+
+---
+
+## 5. Model Conventions
+
+### Standard Model Pattern
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Customer extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = ['name', 'phone', 'email', 'address', 'notes'];
+
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class);
     }
 }
 ```
 
-- **Pros:** Extremely fast to build, production-ready UI, built-in search/sort/filter, responsive, consistent design
-- **Cons:** UI is opinionated (Filament's style), learning curve for advanced features
-- **Docs:** https://filamentphp.com/docs/3.x
+### Rules
 
-#### B. Custom Livewire Components
-Build each CRUD screen as a Livewire component with Blade views.
+1. **Always use `SoftDeletes`** on core business models (Customer, Transaction, GlassProduct, StockLot, etc.)
+2. **Explicit `$fillable` arrays** — never use `$guarded = []`
+3. **Relationship methods have no return type declarations** — matching current codebase style
+4. **Use `hasMany()` / `belongsTo()`** — standard Eloquent relationship methods only
+5. **One model per file** in `app/Models/`
+6. **Table names are plural snake_case** — `customers`, `glass_products`, `stock_balances`
+7. **Foreign keys follow `{model}_id` convention** — `customer_id`, `vehicle_id`, `glass_product_id`
 
-- **Pros:** Full control over UI/UX, no framework opinions, lighter weight
-- **Cons:** Much more code to write, you must build table sorting/filtering/pagination yourself
-- **Docs:** https://livewire.laravel.com/docs
+### Model Inventory (24 models)
 
-#### C. Hybrid (Filament + Custom Livewire)
-Use Filament for admin/management panels and custom Livewire for customer-facing or technician-facing pages.
+```text
+Core Business:
+├── Customer, Vehicle
+├── CarBrand, CarModel
+├── GlassPosition, GlassProduct
+├── Accessory, Service, Technician, Supplier, Rack
 
-- **Pros:** Best of both worlds — fast admin CRUD + custom UX where needed
-- **Cons:** Two patterns to maintain, potential style inconsistency
+Inventory:
+├── StockLot, StockBalance, StockMovement
+├── StockOpname, StockOpnameItem, StockAllocation
+
+Transactions:
+├── Transaction, TransactionItem, Payment, ServiceAssignment
+
+System:
+└── User
+```
 
 ---
 
-## 3. Roles & Permission Management
+## 6. Enum Conventions
 
-### What is it?
-Roles & permissions control **what each user can do** after they log in. For example: an Admin can manage all data, a Cashier can only create transactions, a Technician can only view assigned jobs.
-
-### Options
-
-#### A. Spatie Permission + Filament Shield (Recommended)
-Spatie Laravel Permission is the most popular permission package. Filament Shield auto-generates permissions for every Filament resource/page/widget.
+### Standard Enum Pattern
 
 ```php
-// Example: Using permissions
-Role::create(['name' => 'admin']);
-Role::create(['name' => 'cashier']);
-Permission::create(['name' => 'manage customers']);
-$user->assignRole('cashier');
-$user->givePermissionTo('manage customers');
+<?php
 
-// In Filament Resource:
-class CustomerResource extends Resource
+namespace App\Enums;
+
+enum TransactionType: string
 {
-    public static function canAccess(): bool
+    case GlassSale = 'glass_sale';
+    case GlassInstallation = 'glass_installation';
+    case ServiceOnly = 'service_only';
+
+    public function label(): string
     {
-        return auth()->user()->can('manage customers');
+        return match ($this) {
+            self::GlassSale => 'Glass Sale',
+            self::GlassInstallation => 'Glass Installation',
+            self::ServiceOnly => 'Service Only',
+        };
     }
 }
 ```
 
-- **Pros:** Battle-tested, auto-generates permissions for Filament resources, GUI for managing roles
-- **Cons:** Adds a package dependency, permission matrix can grow large
-- **Docs:** https://spatie.be/docs/laravel-permission/ and https://github.com/bezhansaleh/filament-shield
+### Rules
 
-#### B. Spatie Permission (Without Shield)
-Use Spatie Permission alone, manually defining each permission.
+1. **Backed string enums** — `enum Name: string`
+2. **TitleCase case names** — `GlassSale`, `ServiceOnly`, `Cash`, `QRIS`
+3. **snake_case database values** — `'glass_sale'`, `'service_only'`, `'cash'`
+4. **`label(): string` method** on every enum — returns human-readable display text
+5. **One enum per file** in `app/Enums/`
 
-- **Pros:** Full control over permission names
-- **Cons:** More manual work to keep permissions in sync with new resources
+### Existing Enums
 
-#### C. Laravel Policies Only
-Use Laravel's built-in policy system without any package.
-
-- **Pros:** No extra package, built into Laravel, simple for small apps
-- **Cons:** No database-backed roles, harder to manage at scale, no GUI for role management
-- **Docs:** https://laravel.com/docs/12.x/authorization#defining-policies
-
-#### D. Bouncer
-An alternative to Spatie with a simpler API and "abilities" concept.
-
-- **Pros:** Simpler API than Spatie, supports both roles and abilities
-- **Cons:** Less popular, fewer Filament integrations
-
-### Recommendation
-**Spatie Permission + Filament Shield** is the standard for Filament projects. It auto-generates permissions for every Filament resource you create.
+| Enum | Cases | Database Column |
+|------|-------|-----------------|
+| `TransactionType` | `GlassSale`, `GlassInstallation`, `ServiceOnly` | `transactions.type` |
+| `TransactionStatus` | `Pending`, `Confirmed`, `Cancelled` | `transactions.status` |
+| `PaymentMethod` | `Cash`, `Transfer`, `QRIS`, `Other` | `payments.method` |
+| `StockMovementType` | `In`, `Out`, `Transfer`, `Adjustment` | `stock_movements.type` |
 
 ---
 
-## 4. Service / Action / DTO Layer
+## 7. Migration Conventions
 
-### What is it?
-This is about **where business logic lives**. When a customer buys a glass product, stock needs to be decremented, a transaction created, a payment recorded, and a stock movement logged. Where does that code go?
+### File Naming
 
-### Options
+```text
+YYYY_MM_DD_HHMMSS_create_{table_name}_table.php
+```
 
-#### A. Keep It Simple (No Service Layer)
-Put business logic directly in Filament Resources, Eloquent models, or controllers.
+- Timestamps use **seconds precision** (standard Laravel format)
+- Related tables may share the same timestamp prefix
+- Suffix is always `_create_{table}_table`
 
-- **Pros:** Fast to implement, everything in one place
-- **Cons:** Resources become huge, hard to test business logic in isolation, logic gets duplicated
-- **Best for:** Small apps, rapid prototyping, MVPs
+### Column Conventions
 
-#### B. Service Classes (Recommended)
-Extract complex business operations into dedicated service classes.
+| Pattern | Usage |
+|---------|-------|
+| `$table->id()` | Primary key (bigIncrements) |
+| `$table->foreignId('model_id')->constrained()->cascadeOnDelete()` | Foreign keys |
+| `$table->string('type')` | Enum columns stored as strings |
+| `$table->string('status')->default('pending')` | Status with default |
+| `$table->text('notes')->nullable()` | Optional text fields |
+| `$table->timestamps()` | `created_at` / `updated_at` |
+| `$table->softDeletes()` | Soft delete timestamp |
+
+### Index Conventions
+
+- Foreign keys with `->constrained()` get automatic indexes
+- Add explicit indexes for frequently queried columns: `$table->index(['customer_id', 'created_at'])`
+- Unique constraints create automatic indexes — don't duplicate with `->index()`
+
+### Existing Migrations (26)
+
+```text
+System:      users, cache, jobs
+Core:        customers, vehicles, car_brands, car_models, glass_positions,
+             glass_products, services, accessories, suppliers, technicians, racks
+Inventory:   stock_balances, stock_lots, stock_movements, stock_opnames,
+             stock_opname_items, stock_allocations, product_accessories,
+             product_compatibilities
+Transactions: transactions, transaction_items, payments, service_assignments
+```
+
+---
+
+## 8. Seeder Conventions
+
+### Standard Seeder Pattern
 
 ```php
-class TransactionService
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Customer;
+use Illuminate\Database\Seeder;
+
+class CustomerSeeder extends Seeder
 {
-    public function createSale(Customer $customer, array $items, float $totalPaid): Transaction
+    public function run(): void
     {
-        $transaction = Transaction::create([...]);
-        foreach ($items as $item) {
-            TransactionItem::create([...]);
-            StockBalance::where('glass_product_id', $item['product_id'])->decrement('quantity', $item['qty']);
-            StockMovement::create([...]);
+        $customers = [
+            ['name' => 'Budi Hartono', 'phone' => '0812-1111-2222', ...],
+            ['name' => 'Siti Rahayu', 'phone' => '0856-3333-4444', ...],
+        ];
+
+        foreach ($customers as $customer) {
+            Customer::create($customer);
         }
-        return $transaction;
     }
 }
 ```
 
-- **Pros:** Reusable, testable, keeps models/resources clean, clear single responsibility
-- **Cons:** Extra directory/files, can become "junk drawers" if not well-organized
-- **Best for:** Medium to large apps with complex business rules (like this one)
+### Rules
 
-#### C. Action Classes
-Each action is a single-purpose class (one class = one operation).
+1. **Array-based seed data** — each record is an associative array
+2. **Indonesian workshop data** — names, addresses, phone numbers from Surabaya
+3. **`foreach` + `Model::create()`** pattern — simple and readable
+4. **One seeder per entity type** — `CustomerSeeder`, `GlassProductSeeder`, etc.
+5. **`DatabaseSeeder` orchestrates** — calls individual seeders in dependency order
+6. **Seed data designed for meaningful dashboard results** — not random data
 
-- **Pros:** Very focused, easy to test, clear intent from class name
-- **Cons:** Many small files, overkill for simple operations
-- **Best for:** Large apps with complex domain logic
+### Seed Data Coverage (13 seeders)
 
-#### D. DTOs (Data Transfer Objects) + Actions
-DTOs are simple data objects that carry data between layers without business logic.
+```text
+Master Data:
+├── CustomerSeeder (5 customers)
+├── VehicleSeeder (multiple vehicles per customer)
+├── CarBrandSeeder / CarModelSeeder
+├── GlassPositionSeeder
+├── TechnicianSeeder
+├── SupplierSeeder
+├── RackSeeder
 
-```php
-readonly class SaleData
-{
-    public function __construct(
-        public int $customerId,
-        public array $items,
-        public float $totalPaid,
-        public ?string $notes = null,
-    ) {}
-}
+Product & Inventory:
+├── GlassProductSeeder
+├── AccessorySeeder
+├── ServiceSeeder
+├── StockLotSeeder + StockBalanceSeeder
+
+Transactions:
+└── TransactionSeeder (glass sales, installations, service-only)
 ```
-
-- **Pros:** Type-safe data passing, self-documenting, IDE autocomplete
-- **Cons:** More files and boilerplate, steeper learning curve
-- **Best for:** Large apps with many data flows, teams
-
-### Recommendation
-Given the complexity of stock management (lot-based tracking, stock movements, allocations, opnames), a **Service Layer** is recommended. Start with services and migrate to Actions+DTOs if complexity grows.
-
----
-
-## 5. Livewire Component Structure
-
-### What is it?
-If we use Livewire (either standalone or within Filament), we need to decide where Livewire components live, how they're named, and how they're organized.
-
-### Options
-
-#### A. `app/Livewire/` (Default since Livewire v3)
-Livewire v3 convention: components live in `app/Livewire/` and views in `resources/views/livewire/`.
-
-```
-app/Livewire/CustomerList.php
-resources/views/livewire/customer-list.blade.php
-```
-
-- **Pros:** Livewire v3 default, simple, widely documented
-- **Cons:** Can get cluttered with many components
-- **Docs:** https://livewire.laravel.com/docs/directory-structure
-
-#### B. Domain-Organized
-Group by business domain.
-
-```
-app/Livewire/Customers/CustomerList.php
-app/Livewire/Transactions/TransactionList.php
-app/Livewire/Inventory/StockBalanceList.php
-```
-
-- **Pros:** Scalable, easy to find related components
-- **Cons:** More directory nesting, overkill for small apps
-
-### Note for Filament
-If we use Filament exclusively for CRUD, we may not need custom Livewire components at all — Filament Resources handle everything. Custom Livewire would only be needed for non-Filament pages (like the dashboard).
-
----
-
-## 6. Blade Component Patterns
-
-### What is it?
-Blade components are reusable UI pieces (buttons, cards, modals, form fields) used in Blade views.
-
-### Options
-
-#### A. Anonymous Components (Recommended)
-Simple `.blade.php` files in `resources/views/components/`. No PHP class needed.
-
-```blade
-{{-- resources/views/components/card.blade.php --}}
-<div {{ $attributes->merge(['class' => 'rounded-xl border bg-white p-6 shadow-sm']) }}>
-    {{ $slot }}
-</div>
-
-{{-- Usage --}}
-<x-card class="mb-4">
-    <h2>Title</h2>
-</x-card>
-```
-
-- **Pros:** Simple, no boilerplate, fast to create, recommended by Laravel
-- **Docs:** https://laravel.com/docs/12.x/blade#anonymous-components
-
-#### B. Class-Based Components
-PHP classes + `.blade.php` files in `app/View/Components/`.
-
-- **Pros:** Complex logic, validation, computed properties
-- **Cons:** More boilerplate, overkill for most UI components
-- **Docs:** https://laravel.com/docs/12.x/blade#class-based-components
-
-#### C. WireUI / Flux / Other Libraries
-Pre-built component libraries that provide polished UI components.
-
-- **Pros:** Professional-looking UI out of the box
-- **Cons:** Additional dependency, may conflict with Filament's UI
-- **Examples:** https://wireui.com/ and https://fluxui.com/
-
-### Note for Filament
-Filament has its own component system (Form Components, Table Columns, Infolists). Custom Blade components would mainly be used in non-Filament pages.
-
----
-
-## 7. Frontend Stack
-
-### What is it?
-The JavaScript and CSS tools that run in the browser to make the UI interactive.
-
-### Current State
-- **Alpine.js** — loaded via CDN (interactive UI behaviors)
-- **Tailwind CSS** — configured via `@tailwindcss/vite` plugin
-- **Vite** — build tool (already configured)
-- **Livewire** — installed (via composer)
-
-### Options
-
-#### A. Alpine.js + Tailwind + Blade (Current)
-Keep the current lightweight stack.
-
-- **Pros:** Lightweight, fast page loads, simple mental model
-- **Cons:** Limited reactivity (full page refreshes for server-side changes)
-- **Best for:** Content-heavy apps, simple dashboards
-
-#### B. Livewire + Alpine.js + Tailwind (Recommended)
-Add Livewire for reactive components that update without full page refreshes.
-
-- **Pros:** Server-side reactivity, still simple, works great with Blade
-- **Cons:** More complex than pure Alpine, requires understanding Livewire lifecycle
-- **Best for:** Interactive dashboards, real-time features, form-heavy apps
-- **Docs:** https://livewire.laravel.com/docs
-
-#### C. Inertia.js + Vue/React + Tailwind
-Use Inertia.js to connect Laravel backend to a Vue.js or React frontend.
-
-- **Pros:** Full SPA experience, rich client-side interactivity
-- **Cons:** Requires JavaScript framework knowledge, heavier, different mental model
-- **Docs:** https://inertiajs.com/
-
-### Recommendation
-**Livewire + Alpine.js + Tailwind** is the natural choice since Livewire is already installed and Filament is built on Livewire.
-
----
-
-## 8. CSS / UI Framework
-
-### What is it?
-The styling system that controls how the application looks.
-
-### Current State
-- **Tailwind CSS** — utility-first CSS framework, already configured
-- **Instrument Sans** — font, already loaded via Vite fonts plugin
-
-### Options
-
-#### A. Tailwind CSS Only (Current)
-Use Tailwind's utility classes directly in Blade templates.
-
-- **Pros:** No extra dependencies, full control, widely known, Filament uses Tailwind internally
-- **Cons:** Verbose HTML, can be hard to maintain in large templates
-- **Docs:** https://tailwindcss.com/
-
-#### B. Tailwind + Flowbite
-Flowbite is a component library built on Tailwind with pre-built components (dropdowns, modals, navbars).
-
-- **Pros:** Pre-built components, consistent design, works with Alpine.js
-- **Cons:** Extra dependency, may conflict with Filament's components
-- **Docs:** https://flowbite.com/
-
-#### C. Tailwind + DaisyUI
-DaisyUI adds component class names to Tailwind (e.g., `btn btn-primary` instead of long utility strings).
-
-- **Pros:** Shorter class names, consistent theming
-- **Cons:** Different class naming, may conflict with Filament's Tailwind setup
-- **Docs:** https://daisyui.com/
-
-### Recommendation
-**Tailwind CSS only** — Filament already uses Tailwind, so no conflict. Keep it simple.
 
 ---
 
 ## 9. Naming Conventions
 
-### What is it?
-Standardized names for routes, views, models, migrations, and methods so the codebase is predictable.
-
-### Recommended Conventions
-
-| Type | Convention | Example |
-|------|-----------|---------|
-| Models | Singular, PascalCase | `Customer`, `GlassProduct`, `StockLot` |
-| Tables | Plural, snake_case | `customers`, `glass_products`, `stock_lots` |
-| Columns | snake_case | `first_name`, `created_at`, `glass_product_id` |
-| Foreign keys | `{model}_id` | `customer_id`, `glass_product_id` |
-| Route names | Dot notation, noun-first | `customers.index`, `customers.store` |
-| View paths | Plural, dot notation | `customers/index.blade.php` |
-| Filament Resources | Plural model + Resource | `CustomerResource`, `GlassProductResource` |
-| Controllers | RESTful methods | `index`, `create`, `store`, `show`, `edit`, `update`, `destroy` |
-| Services | `{Domain}Service` | `TransactionService`, `StockService` |
-| Actions | `{Verb}{Noun}` | `CreateSaleTransaction`, `UpdateStockBalance` |
-| DTOs | `{Noun}Data` | `SaleData`, `StockAdjustmentData` |
+| Entity | Convention | Example |
+|--------|-----------|---------|
+| Model class | Singular PascalCase | `Customer`, `GlassProduct` |
+| Model table | Plural snake_case | `customers`, `glass_products` |
+| Enum class | Singular PascalCase | `TransactionType`, `PaymentMethod` |
+| Enum case | TitleCase | `GlassSale`, `Cash` |
+| Enum DB value | snake_case string | `'glass_sale'`, `'cash'` |
+| Migration file | `create_{table}_table` | `create_customers_table.php` |
+| Seeder class | `{Entity}Seeder` | `CustomerSeeder` |
+| Livewire component | PascalCase | `TransactionIndex`, `StockOpnameForm` |
+| Blade component | kebab-case | `<x-status-badge>`, `<x-card>` |
+| Route name | dot notation | `dashboard`, `transactions.index` |
+| Foreign key | `{model}_id` | `customer_id`, `vehicle_id` |
 
 ---
 
-## 10. Database Conventions
+## 10. Livewire Conventions
 
-### What is it?
-Standards for database design: timestamps, soft deletes, ID types, and relationship patterns.
+### Component Structure
 
-### Primary Key Type
+```text
+app/Livewire/
+├── Dashboard.php              → resources/views/livewire/dashboard.blade.php
+├── TransactionIndex.php       → resources/views/livewire/transaction-index.blade.php
+└── TransactionCreate.php      → resources/views/livewire/transaction-create.blade.php
+```
 
-| Option | Description | Recommendation |
-|--------|-------------|----------------|
-| Auto-incrementing `id` (BIGINT) | Default Laravel | ✅ **Use this** — simple, fast, sufficient for a workshop app |
-| UUID | Universally unique, no sequential leaking | Use if you need distributed IDs or public-facing URLs |
-| ULID | Like UUID but sortable by time | Use for high-throughput event systems |
+### Rules
 
-### Soft Deletes
-Soft deletes add a `deleted_at` column instead of actually deleting rows.
-
-- **Use soft deletes for:** Customers, Transactions, Glass Products (things you might want to audit/recover)
-- **Don't use soft deletes for:** Stock Movements, Payments (immutable records), pivot tables
-- **Docs:** https://laravel.com/docs/12.x/eloquent#soft-deleting
-
-### Timestamps
-- Always use `created_at` and `updated_at` (default Laravel behavior)
-- Add `deleted_at` only where soft deletes are enabled
-- Use `$timestamps = false` only for pivot/junction tables
-
-### Morph Map
-Consider defining a morph map for cleaner database values:
+1. **Full-page components** for most pages — each major page is one Livewire component
+2. **Nested components** only for complex forms (transaction workflow)
+3. **State lives server-side** — UI always reflects server state
+4. **Validate and authorize in actions** — same as HTTP request validation
+5. **Use `mount()` for initialization** — set up component state on load
+6. **Use `#[Route()]` attribute** for routing (Laravel 11+ style):
 
 ```php
-// AppServiceProvider.php
-Relation::enforceMorphMap([
-    'glass_product' => GlassProduct::class,
-    'service' => Service::class,
-    'accessory' => Accessory::class,
-]);
-```
-
-- **Pros:** Cleaner DB values (string keys instead of full class names), easier refactoring
-- **Docs:** https://laravel.com/docs/12.x/eloquent-relationships#polymorphic-relationships
-
----
-
-## 11. Testing Strategy
-
-### What is it?
-What kind of tests to write, what framework to use, and how thorough to be.
-
-### Options
-
-#### A. Pest PHP (Recommended)
-A testing framework built on top of PHPUnit with expressive syntax.
-
-```php
-it('can calculate stock balance', function () {
-    $stock = StockBalance::factory()->create(['quantity' => 10]);
-    expect($stock->quantity)->toBe(10);
-});
-
-it('can create a transaction', function () {
-    $response = $this->post(route('transactions.store'), [
-        'customer_id' => Customer::factory()->create()->id,
-        'items' => [...],
-    ]);
-    $response->assertRedirect();
-    $this->assertDatabaseCount('transactions', 1);
-});
-```
-
-- **Pros:** Expressive syntax, concise, growing Laravel community standard, built on PHPUnit
-- **Docs:** https://pestphp.com/docs
-
-#### B. PHPUnit
-Laravel's default testing framework.
-
-- **Pros:** Built-in, no extra dependency, extensive documentation
-- **Cons:** More verbose, class-based syntax
-- **Docs:** https://laravel.com/docs/12.x/testing
-
-### What to Test?
-
-| Test Type | Priority | What It Covers |
-|-----------|----------|----------------|
-| Feature Tests | **High** | HTTP endpoints, form submissions, auth, CRUD operations |
-| Unit Tests | **Medium** | Service classes, business logic, helper functions |
-| Livewire Tests | **High** | Livewire component interactions (if using custom Livewire) |
-| Filament Tests | **Medium** | Filament resource actions, pages |
-| Browser Tests (Dusk) | **Low** | Full browser automation, complex UI flows |
-
-### Recommendation
-**Pest PHP** for cleaner syntax. Focus on **Feature tests** for CRUD and **Unit tests** for business logic.
-
----
-
-## 12. File Organization
-
-### Where to put different types of files so the project stays organized.
-
-```
-awm/
-├── app/
-│   ├── Enums/                          # PHP enums (exists ✅)
-│   ├── Models/                         # Eloquent models (exists ✅)
-│   ├── Services/                       # Business logic service classes
-│   │   ├── TransactionService.php
-│   │   └── StockService.php
-│   ├── Actions/                        # (Optional) Single-purpose action classes
-│   │   └── Transactions/
-│   │       └── CreateSaleTransaction.php
-│   ├── DTOs/                           # (Optional) Data transfer objects
-│   │   └── SaleData.php
-│   ├── Filament/                       # Filament resources, pages, widgets
-│   │   └── Resources/
-│   │       ├── CustomerResource.php
-│   │       └── GlassProductResource.php
-│   ├── Http/Controllers/               # Traditional controllers (if needed)
-│   ├── Livewire/                       # Custom Livewire components (if any)
-│   └── Providers/
-├── database/
-│   ├── migrations/                     # (exists ✅)
-│   ├── seeders/                        # (exists ✅)
-│   └── factories/                      # Model factories for testing
-├── resources/views/
-│   ├── components/                     # Anonymous Blade components
-│   ├── layouts/                        # (exists ✅)
-│   ├── livewire/                       # Livewire component views
-│   └── filament/                       # Filament view overrides
-├── routes/
-└── tests/
-    ├── Unit/
-    └── Feature/
-```
-
-### Key Rules
-1. **Group by type first, then by domain** — `Services/TransactionService.php`
-2. **One class per file** — following PSR-4 autoloading
-3. **Filament files stay in `app/Filament/`** — don't mix with other app code
-4. **Keep views organized by concern** — `layouts/`, `components/`, `livewire/`, `filament/`
-
----
-
-## 13. Filament Panel Configuration
-
-### What is it?
-Filament organizes its admin area into "panels." You can have one panel (single admin) or multiple panels (e.g., admin + staff + customer portal).
-
-### Options
-
-#### A. Single Panel (Recommended)
-One Filament panel for all admin/management tasks.
-
-```php
-class AdminPanelProvider extends PanelProvider
+#[Route('/transactions', name: 'transactions.index')]
+class TransactionIndex extends Component
 {
-    public function panel(Panel $panel): Panel
+    public function render()
     {
-        return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
-            ->login()
-            ->colors(['primary' => Color::Blue])
-            ->navigationGroups([
-                'Master Data',
-                'Inventory',
-                'Transactions',
-                'Analytics',
-                'Settings',
-            ]);
+        return view('livewire.transaction-index');
     }
 }
 ```
 
-- **Pros:** Simple, one login, one place for all management
-- **Cons:** All roles share the same panel (permissions control access, not separate logins)
+### View Files
 
-#### B. Multi-Panel
-Multiple panels with separate logins and UIs.
-
-- **Pros:** Different login experiences for different roles
-- **Cons:** More setup, duplicate configuration
-- **Best for:** Multi-tenant SaaS, platforms with distinct user types
-
-### Key Features to Configure
-
-| Feature | Description | Recommendation |
-|---------|-------------|----------------|
-| `->login()` | Enables login page | ✅ Use |
-| `->registration()` | Enables public registration | ❌ Skip (admin-only) |
-| `->passwordReset()` | Enables password reset | ✅ Use |
-| `->emailVerification()` | Requires email verification | ❌ Skip for now |
-| `->sidebarCollapsibleOnDesktop()` | Collapses sidebar | ✅ Use |
-| `->navigationGroups()` | Groups sidebar items | ✅ Use |
-| `->widgets()` | Dashboard widgets | ✅ Use |
-| `->colors()` | Brand colors | ✅ Use |
-| `->favicon()` | Panel favicon | ✅ Use |
-
-### Filament Resources to Create (Phase 2 Preview)
-
-**Master Data:** CustomerResource, VehicleResource, CarBrandResource, CarModelResource, GlassPositionResource, TechnicianResource, SupplierResource
-
-**Product & Inventory:** GlassProductResource, AccessoryResource, RackResource, StockBalanceResource, StockLotResource, StockMovementResource, StockOpnameResource, StockAllocationResource
-
-**Transactions:** TransactionResource, TransactionItemResource, PaymentResource, ServiceAssignmentResource
-
-**Settings:** Filament's built-in User resource
+- Livewire views go in `resources/views/livewire/`
+- View file name matches component name in kebab-case
+- Use `wire:model` for form bindings, `wire:click` for actions
+- Use Alpine.js for client-side only interactions (modals, dropdowns)
 
 ---
 
-## Summary: Decision Checklist
+## 11. Blade Conventions
 
-Once you've reviewed all sections, we'll make final decisions on:
+### Component Types
 
-- [ ] **Auth:** Filament default + Breeze for dashboard? Or just Filament?
-- [ ] **CRUD:** Filament Resources (100%) or Hybrid with custom Livewire?
-- [ ] **Roles:** Spatie Permission + Shield? Or simpler approach?
-- [ ] **Business Logic:** Service layer? Actions? Keep it simple?
-- [ ] **Testing:** Pest or PHPUnit? How thorough?
-- [ ] **Filament:** Single panel or multi-panel?
+| Type | Location | Use Case |
+|------|----------|----------|
+| Anonymous components | `resources/views/components/` | Presentational elements |
+| Class-based components | `app/View/Components/` | Components needing PHP logic (rare) |
+| Livewire views | `resources/views/livewire/` | Dynamic, interactive pages |
+| Layouts | `resources/views/layouts/` | Page wrappers |
 
-> **Next Step:** Read through this document, research the links, and tell me which options you'd like to go with. I'll then finalize the conventions and update `AGENTS.md` to match.
+### Rules
+
+1. **Anonymous components for all presentational elements** — `<x-card>`, `<x-status-badge>`
+2. **Use `{{ $slot }}`** for component content injection
+3. **Use `$attributes->merge()`** for attribute forwarding
+4. **Tailwind utility classes** directly in templates — no separate CSS files
+5. **Alpine.js for client-side interactions** — `x-data`, `x-show`, `x-on:click`
+6. **`wire:` directives for server interactions** — `wire:model`, `wire:click`
+7. **Named routes with `route()`** helper
 
 ---
 
-*Last updated: 2026-08-10 | Phase 1 — Auto Glass Workshop Management System*
+## 12. Testing Conventions
+
+### Framework
+
+**Pest** — configured in `composer.json`, run with `php artisan test`.
+
+### Test Creation
+
+```bash
+# Feature test (preferred)
+php artisan make:test --pest CustomerManagementTest
+
+# Unit test
+php artisan make:test --pest --unit StockCalculationTest
+```
+
+### Test Rules
+
+1. **Feature tests preferred over unit tests** — test the full request/response cycle
+2. **Use factories** for creating test models
+3. **Use `php artisan test --compact`** to run tests
+4. **Use `php artisan test --compact --filter=testName`** to filter tests
+5. **Do NOT delete tests without approval**
+6. **Code formatting before commit:** `vendor/bin/pint --dirty --format agent`
+
+### Critical Test Areas
+
+```text
+Stock Calculation          — Stock-in, stock-out, transfer, balance
+Stock Allocation           — Which lot gets deducted first
+Transaction Creation       — Glass sale, installation, service-only
+Transaction Rollback       — Stock restoration on cancellation
+Payment Calculation        — Full payment, partial payment
+Profit Calculation         — Revenue minus glass cost
+Minimum Stock Warnings     — LOW STOCK, OUT OF STOCK detection
+Product Compatibility      — Vehicle-glass relationships
+Complaint Traceability     — License plate → transaction → stock lot
+```
+
+---
+
+## 13. Code Style
+
+### Formatter
+
+**Laravel Pint** — PSR-12 base with Laravel preset.
+
+### Rules
+
+1. **Run Pint before committing:** `vendor/bin/pint --dirty --format agent`
+2. **Don't run `pint --test`** — just run `pint` to fix
+3. **PSR-12 compliant** — spaces, brackets, line lengths
+4. **Use descriptive variable/method names** — `isRegisteredForDiscounts` not `discount()`
+5. **Check sibling files** for conventions before creating new files
+6. **One class per file** — PSR-4 autoloading
+
+### PHP Conventions
+
+```php
+// Explicit return types and parameter type hints
+public function calculateProfit(Transaction $transaction): float
+{
+    // ...
+}
+
+// Enums: TitleCase cases, snake_case values
+enum PaymentMethod: string
+{
+    case Cash = 'cash';
+}
+
+// No empty __construct() unless private
+// Prefer PHPDoc over inline comments
+// Use array shape type definitions in PHPDoc
+```
+
+---
+
+## 14. Project Principles
+
+These principles guide every implementation decision:
+
+1. **Inventory accuracy comes first.**
+2. **Every stock change must be traceable.**
+3. **Historical transaction data must not depend on current product prices.**
+4. **Actual purchase cost comes from the stock lot used.**
+5. **Customer-facing pricing must remain flexible.**
+6. **The price calculator is a negotiation tool, not an inventory record.**
+7. **A package transaction may have one customer-facing price while still tracking the glass used internally.**
+8. **Vehicle and license plate information are essential for complaint traceability.**
+9. **Profit is calculated as revenue minus glass cost.**
+10. **The demo and production application use the same application architecture.**
+11. **SQLite is used for development/demo, while PostgreSQL (Supabase) is used for production.**
+12. **Demo data is generated through seeders rather than hardcoded application state.**
+13. **The application should remain practical and deployable on modern cloud platforms.**
+14. **Complex infrastructure should not be introduced unless the business actually requires it.**
+15. **Core workshop workflows take priority over secondary features.**
+
+---
+
+*Last updated: 2026-08-12 | Phase 1 Complete — Auto Glass Workshop Management System*
