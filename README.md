@@ -4,7 +4,7 @@
 
 **Status:** 🚧 In Development
 **Version:** 0.3.0
-**Deployment Target:** Render (Docker) + Supabase PostgreSQL
+**Deployment Target:** VPS + Supabase PostgreSQL
 
 ---
 
@@ -550,7 +550,7 @@ The calculator itself does not modify the product price, inventory, supplier dat
 
 ### Deployment
 
-* Render Web Service (Docker)
+* VPS (Tencent Cloud / Ubuntu 24.04)
 * Supabase PostgreSQL (Session mode pooler)
 * PHP 8.3 CLI
 
@@ -735,9 +735,9 @@ Development Server
 ### Portfolio Demo (Deployed)
 
 ```text
-GitHub Push
+Git Push
    ↓
-Render Docker Build
+VPS Deployment
    ↓
 Laravel + PHP 8.3 CLI
    ↓
@@ -1035,7 +1035,7 @@ Customer
 * [x] Establish application conventions
 * [x] Create initial database migrations (26 migrations)
 * [x] Create base seeders (13 seeders with Indonesian workshop data)
-* [x] Create Dockerfile for Render deployment
+* [x] Configure VPS deployment with Supabase
 
 ---
 
@@ -1224,7 +1224,7 @@ Authentication      ░░░░░░░░░░   0%
 | Foundation     | Application conventions        | 🟢      |
 | Foundation     | Database migrations            | 🟢      |
 | Foundation     | Demo seeders                   | 🟢      |
-| Foundation     | Docker deployment              | 🟢      |
+| Foundation     | VPS deployment              | 🟢      |
 | Master Data    | Customer management            | 🟢      |
 | Master Data    | Vehicle management             | 🟢      |
 | Master Data    | Technician management          | 🟢      |
@@ -1317,22 +1317,19 @@ Important test areas include:
 
 ## 🚢 Deployment
 
-The portfolio demo is deployed on **Render** using Docker, with **Supabase PostgreSQL** as the production database.
+The application is deployed on a **VPS** (Tencent Cloud, Ubuntu 24.04) with **Supabase PostgreSQL** as the production database.
 
 ### Architecture
 
 ```text
-GitHub (main branch)
-   ↓ (auto deploy)
-Render Web Service (Docker)
-   ├── Dockerfile builds PHP 8.3 CLI + Node.js 22
-   ├── composer install --no-dev
-   ├── npm install && npm run build
-   └── php artisan serve --host=0.0.0.0 --port=$PORT
+VPS (Ubuntu 24.04)
+   ├── PHP 8.3 + Composer
+   ├── Node.js 22 + npm
+   └── Laravel artisan serve / Nginx
           ↓
 Supabase PostgreSQL (Session mode pooler)
           ↓
-Live Demo Application
+Live Application
 ```
 
 ### Production Database
@@ -1346,61 +1343,52 @@ DB_PORT=6543
 DB_DATABASE=postgres
 DB_USERNAME=postgres.<your-project-ref>
 DB_PASSWORD=<your-password>
+DB_SSLMODE=require
 ```
 
 ### Deployment Steps
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com) and note the pooler connection details.
 
-2. **Create a Render Web Service:**
-   * Connect your GitHub repository.
-   * Select **Docker** as the runtime.
-   * Set the Dockerfile path to `Dockerfile` (repo root).
-   * Set the build context directory if needed.
+2. **Set up the VPS:**
+   * Install PHP 8.3 with required extensions (pdo_pgsql, pgsql, mbstring, bcmath, gd, xml, opcache)
+   * Install Composer
+   * Install Node.js 22 and npm
+   * Install and configure Nginx as reverse proxy
 
-3. **Configure environment variables** in Render:
-
-   ```text
-   APP_NAME="Workshop Management System"
-   APP_ENV=production
-   APP_DEBUG=false
-   APP_KEY=<generated-key>
-   APP_URL=https://your-app.onrender.com
-
-   DB_CONNECTION=pgsql
-   DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
-   DB_PORT=6543
-   DB_DATABASE=postgres
-   DB_USERNAME=postgres.<your-project-ref>
-   DB_PASSWORD=<your-supabase-password>
-
-   SESSION_DRIVER=database
-   CACHE_STORE=database
-   QUEUE_CONNECTION=database
-   ```
-
-4. **Configure pre-deploy command** in Render:
+3. **Clone the repository** and configure environment:
 
    ```bash
-   php artisan migrate --force && php artisan db:seed --force
+   git clone https://github.com/fauzihiz/autoglass-workshop-management.git
+   cd autoglass-workshop-management/awm
+   cp .env.production.example .env
+   php artisan key:generate
+   # Edit .env with your Supabase credentials
    ```
 
-   This runs migrations and seeds demo data on every deploy.
+4. **Install dependencies and build:**
 
-5. **Deploy** — push to `main` branch to trigger a build.
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   npm ci && npm run build
+   ```
+
+5. **Run migrations and seed:**
+
+   ```bash
+   php artisan migrate --force
+   php artisan db:seed --force
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   ```
 
 6. **Run production smoke tests:**
-   * Verify the application loads at the Render URL.
+   * Verify the application loads at the VPS URL.
    * Check that demo data is visible on the dashboard.
    * Verify inventory, transactions, and analytics pages work.
 
 Production should **never expose `.env` or application source files directly through the public web root**.
-
-### Render Notes
-
-* Render provides **HTTPS termination** — the container runs `php artisan serve` on port 8000, and Render handles SSL externally.
-* Render's **free tier** spins down after inactivity — first request may take 30-60 seconds.
-* Seed data persists in Supabase across redeploys because `migrate --force` does not drop tables.
 
 ---
 

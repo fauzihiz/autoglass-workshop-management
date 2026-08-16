@@ -167,45 +167,29 @@ return new class extends Migration
 
 ## 4. Deployment
 
-### Render + Docker Architecture
+### VPS + Supabase Architecture
 
 ```text
-GitHub (main branch)
-   ↓ (auto deploy)
-Render Web Service (Docker)
-   ├── Multi-stage Dockerfile (repo root)
-   │   ├── Stage 1: php:8.3-cli builder
-   │   │   ├── Composer install --no-dev
-   │   │   ├── npm ci && npm run build
-   │   │   └── Laravel optimize (config/route/view cache)
-   │   └── Stage 2: php:8.3-cli runtime
-   │       ├── Copy built app from builder
-   │       └── CMD: migrate --force && artisan serve
-   └── Port 8000 (Render handles HTTPS)
+VPS (Ubuntu 24.04)
+   ├── PHP 8.3 + Composer
+   ├── Node.js 22 + npm
+   └── Laravel artisan serve / Nginx
           ↓
 Supabase PostgreSQL (Session mode pooler)
           ↓
-Live Demo Application
+Live Application
 ```
 
-### Pre-Deploy Command
+### Production Environment Variables
 
-```bash
-php artisan migrate --force && php artisan db:seed --force
-```
-
-- `migrate --force` runs pending migrations without confirmation
-- `db:seed --force` re-seeds demo data (seeders handle duplicates gracefully)
-- Seed data persists in Supabase across redeploys because migrations don't drop tables
-
-### Render Environment Variables
+Copy `.env.production.example` to `.env` on the VPS and fill in your credentials:
 
 ```text
 APP_NAME="Workshop Management System"
 APP_ENV=production
 APP_DEBUG=false
-APP_KEY=<generated>
-APP_URL=https://your-app.onrender.com
+APP_KEY=<run: php artisan key:generate --show>
+APP_URL=http://<your-vps-ip>
 
 DB_CONNECTION=pgsql
 DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
@@ -213,17 +197,35 @@ DB_PORT=6543
 DB_DATABASE=postgres
 DB_USERNAME=postgres.<project-ref>
 DB_PASSWORD=<password>
+DB_SSLMODE=require
 
 SESSION_DRIVER=database
 CACHE_STORE=database
 QUEUE_CONNECTION=database
 ```
 
-### Render Notes
+### Deployment Commands
 
-- Render's **free tier** spins down after inactivity — first request may take 30-60 seconds
-- **HTTPS termination** is handled by Render — the container only exposes HTTP on port 8000
+```bash
+# On the VPS
+cd autoglass-workshop-management/awm
+composer install --no-dev --optimize-autoloader
+npm ci && npm run build
+php artisan migrate --force
+php artisan db:seed --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+- `migrate --force` runs pending migrations without confirmation
+- `db:seed --force` re-seeds demo data (seeders handle duplicates gracefully)
+- Seed data persists in Supabase across redeploys because migrations don't drop tables
+
+### VPS Notes
+
 - Seed data persists because `migrate --force` does not drop existing tables
+- Use Nginx as reverse proxy for production (SSL, static assets, performance)
 
 ---
 
