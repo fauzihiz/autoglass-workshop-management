@@ -3,7 +3,7 @@
 > A web-based management system for automotive glass workshops to manage customers, vehicles, glass inventory, rack locations, transactions, technicians, payments, and business insights in one place.
 
 **Status:** 🚧 In Development
-**Version:** 0.6.0
+**Version:** 0.7.0
 **Deployment Target:** VPS + Supabase PostgreSQL
 
 ---
@@ -169,21 +169,17 @@ The final negotiated selling price is stored only when the transaction is confir
 
 The system provides insights into:
 
-* Total revenue
-* Glass-only sales
-* Glass installation revenue
-* Service-only revenue
-* Glass cost
-* Profit
-* Transaction volume
+* Total revenue (this month, last month, this year, all time)
+* Profit margin (revenue minus glass cost)
+* Transaction type breakdown (glass sale, glass installation, service only)
+* Sales trend (6-month bar chart)
 * Best-selling glass products
-* Glass movement
-* Stock status
-* Low-stock products
-* Customer purchasing frequency
-* Top customers
-* Sales trends
-* Stock movement trends
+* Glass movement analysis (in, out, transfer, adjustment)
+* Stock status and stock value overview
+* Low-stock and out-of-stock products
+* Customer ranking by spending
+* Purchase frequency per month
+* Fast-moving and slow-moving products
 
 ---
 
@@ -1145,22 +1141,22 @@ Customer
 
 **Goal:** Turn operational data into useful business insights.
 
-* [ ] Overview dashboard
-* [ ] Revenue summary
-* [ ] Glass sales summary
-* [ ] Glass installation summary
-* [ ] Service-only summary
-* [ ] Glass cost summary
-* [ ] Profit summary
-* [ ] Sales trend chart
-* [ ] Best-selling glass
-* [ ] Glass movement analysis
-* [ ] Customer ranking
-* [ ] Purchase frequency analysis
-* [ ] Stock alert dashboard
-* [ ] Fast-moving products
-* [ ] Slow-moving products
-* [ ] Stock value overview
+* [x] Overview dashboard
+* [x] Revenue summary
+* [x] Glass sales summary
+* [x] Glass installation summary
+* [x] Service-only summary
+* [x] Glass cost summary
+* [x] Profit summary
+* [x] Sales trend chart
+* [x] Best-selling glass
+* [x] Glass movement analysis
+* [x] Customer ranking
+* [x] Purchase frequency analysis
+* [x] Stock alert dashboard
+* [x] Fast-moving products
+* [x] Slow-moving products
+* [x] Stock value overview
 
 ---
 
@@ -1222,7 +1218,7 @@ Master Data         ██████████ 100%
 Inventory           ██████████ 100%
 Transactions        ██████████ 100%
 History & Complaint ██████████ 100%
-Analytics           ░░░░░░░░░░   0%
+Analytics           ██████████ 100%
 Production          ░░░░░░░░░░   0%
 Authentication      ░░░░░░░░░░   0%
 ```
@@ -1276,12 +1272,12 @@ Authentication      ░░░░░░░░░░   0%
 | History        | Transaction history            | 🟢      |
 | History        | Vehicle history                | 🟢      |
 | History        | Complaint traceability         | 🟢      |
-| Analytics      | Revenue dashboard              | ⬜      |
-| Analytics      | Profit dashboard               | ⬜      |
-| Analytics      | Glass sales analytics          | ⬜      |
-| Analytics      | Installation analytics         | ⬜      |
-| Analytics      | Customer analytics             | ⬜      |
-| Analytics      | Stock analytics                | ⬜      |
+| Analytics      | Revenue dashboard              | 🟢      |
+| Analytics      | Profit dashboard               | 🟢      |
+| Analytics      | Glass sales analytics          | 🟢      |
+| Analytics      | Installation analytics         | 🟢      |
+| Analytics      | Customer analytics             | 🟢      |
+| Analytics      | Stock analytics                | 🟢      |
 | Production     | Validation review              | ⬜      |
 | Production     | Error handling                 | ⬜      |
 | Production     | Testing                        | ⬜      |

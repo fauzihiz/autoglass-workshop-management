@@ -1,9 +1,47 @@
 <?php
 
+use App\Models\Customer;
+use App\Models\GlassProduct;
+use App\Models\Payment;
+use App\Models\Transaction;
 use Illuminate\Support\Facades\Route;
 use App\Livewire;
 
-Route::get('/', fn () => view('dashboard'))->name('dashboard');
+Route::get('/', function () {
+    $totalCustomers = Customer::count();
+    $totalProducts = GlassProduct::where('is_active', true)->count();
+    $transactionsThisMonth = Transaction::whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->count();
+    $revenueThisMonth = (float) Payment::whereMonth('paid_at', now()->month)
+        ->whereYear('paid_at', now()->year)
+        ->sum('amount');
+
+    $recentTransactions = Transaction::with(['customer', 'vehicle'])
+        ->latest()
+        ->limit(5)
+        ->get();
+
+    // Stock alerts: products at or below minimum stock
+    $allProducts = GlassProduct::where('is_active', true)->with('stockLots')->get()->map(function ($p) {
+        $p->total_stock;
+        return $p;
+    });
+    $lowStockCount = $allProducts->filter(fn ($p) => $p->total_stock > 0 && $p->total_stock <= $p->minimum_stock)->count();
+    $outOfStockCount = $allProducts->filter(fn ($p) => $p->total_stock === 0)->count();
+    $stockAlerts = $allProducts->filter(fn ($p) => $p->total_stock <= $p->minimum_stock)->take(5);
+
+    return view('dashboard', compact(
+        'totalCustomers',
+        'totalProducts',
+        'transactionsThisMonth',
+        'revenueThisMonth',
+        'recentTransactions',
+        'lowStockCount',
+        'outOfStockCount',
+        'stockAlerts',
+    ));
+})->name('dashboard');
 
 // ── Master Data (Livewire Full-Page Components) ──
 Route::get('/customers', Livewire\CustomerIndex::class)->name('customers.index');
@@ -33,6 +71,9 @@ Route::get('/transactions', Livewire\TransactionIndex::class)->name('transaction
 Route::get('/transactions/create', Livewire\TransactionCreate::class)->name('transactions.create');
 Route::get('/transactions/{transaction}', Livewire\TransactionShow::class)->name('transactions.show');
 Route::get('/transactions/{transaction}/print', Livewire\InvoicePrint::class)->name('invoices.print');
+
+// ── Analytics (Phase 6) ──
+Route::get('/analytics', Livewire\AnalyticsIndex::class)->name('analytics.index');
 
 // ── History & Traceability (Phase 5) ──
 Route::get('/payments', Livewire\PaymentIndex::class)->name('payments.index');

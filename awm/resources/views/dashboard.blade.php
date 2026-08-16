@@ -4,6 +4,7 @@
 @section('header', 'Dashboard')
 
 @section('content')
+    {{-- ── KPI Cards ── --}}
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <div class="flex items-center gap-4">
@@ -12,7 +13,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-500">Total Customers</p>
-                    <p class="text-2xl font-bold text-gray-900">—</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $totalCustomers }}</p>
                 </div>
             </div>
         </div>
@@ -24,7 +25,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-500">Transactions This Month</p>
-                    <p class="text-2xl font-bold text-gray-900">—</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $transactionsThisMonth }}</p>
                 </div>
             </div>
         </div>
@@ -36,7 +37,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-500">Low Stock Items</p>
-                    <p class="text-2xl font-bold text-gray-900">—</p>
+                    <p class="text-2xl font-bold {{ ($lowStockCount + $outOfStockCount) > 0 ? 'text-amber-600' : 'text-gray-900' }}">{{ $lowStockCount + $outOfStockCount }}</p>
                 </div>
             </div>
         </div>
@@ -48,21 +49,77 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-500">Revenue (This Month)</p>
-                    <p class="text-2xl font-bold text-gray-900">—</p>
+                    <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($revenueThisMonth, 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
     </div>
 
+    {{-- ── Two-column: Recent Transactions + Stock Alerts ── --}}
     <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 class="mb-4 text-base font-semibold text-gray-900">Recent Transactions</h2>
-            <p class="text-sm text-gray-500">No transactions yet. Data will appear here once transactions are recorded.</p>
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-base font-semibold text-gray-900">Recent Transactions</h2>
+                <a href="{{ route('transactions.index') }}" class="text-sm font-medium text-blue-600 hover:underline">View all →</a>
+            </div>
+            @if ($recentTransactions->isEmpty())
+                <p class="text-sm text-gray-500">No transactions yet.</p>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-100 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                <th class="pb-2 pr-4">Invoice</th>
+                                <th class="pb-2 pr-4">Customer</th>
+                                <th class="pb-2 pr-4">Type</th>
+                                <th class="pb-2 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            @foreach ($recentTransactions as $tx)
+                                <tr>
+                                    <td class="whitespace-nowrap py-2 pr-4">
+                                        <a href="{{ route('transactions.show', $tx->id) }}" class="font-medium text-blue-600 hover:underline">{{ $tx->invoice_number }}</a>
+                                    </td>
+                                    <td class="whitespace-nowrap py-2 pr-4 text-gray-700">{{ $tx->customer->name ?? '—' }}</td>
+                                    <td class="whitespace-nowrap py-2 pr-4 text-gray-500">{{ $tx->type_label }}</td>
+                                    <td class="whitespace-nowrap py-2 text-right">
+                                        <x-badge :variant="$tx->status_color">{{ ucfirst($tx->status) }}</x-badge>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
 
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 class="mb-4 text-base font-semibold text-gray-900">Stock Alerts</h2>
-            <p class="text-sm text-gray-500">No stock alerts. Low stock warnings will appear here.</p>
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-base font-semibold text-gray-900">Stock Alerts</h2>
+                <a href="{{ route('inventory.index') }}" class="text-sm font-medium text-blue-600 hover:underline">View inventory →</a>
+            </div>
+            @if ($stockAlerts->isEmpty())
+                <p class="text-sm text-gray-500">No stock alerts. All products are adequately stocked.</p>
+            @else
+                <div class="space-y-3">
+                    @foreach ($stockAlerts as $product)
+                        <div class="flex items-center justify-between rounded-lg border border-gray-100 p-3">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">{{ $product->name }}</p>
+                                <p class="text-xs text-gray-500">{{ $product->sku }}</p>
+                            </div>
+                            <div class="text-right">
+                                @if ($product->total_stock === 0)
+                                    <x-badge variant="red">Out of Stock</x-badge>
+                                @else
+                                    <x-badge variant="amber">Low Stock ({{ $product->total_stock }}/{{ $product->minimum_stock }})</x-badge>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
 @endsection
