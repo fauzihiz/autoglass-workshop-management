@@ -3,7 +3,7 @@
 > A web-based management system for automotive glass workshops to manage customers, vehicles, glass inventory, rack locations, transactions, technicians, payments, and business insights in one place.
 
 **Status:** 🚧 In Development
-**Version:** 0.4.0
+**Version:** 0.5.0
 **Deployment Target:** VPS + Supabase PostgreSQL
 
 ---
@@ -1098,28 +1098,28 @@ Customer
 
 ---
 
-## Phase 4 — Transaction Management
+## Phase 4 — Transaction Management ✅
 
 **Goal:** Build the complete sales and service workflow.
 
-* [ ] Customer selection
-* [ ] Vehicle selection
-* [ ] Glass availability lookup
-* [ ] Rack availability display
-* [ ] Price calculator
-* [ ] Glass sale transaction
-* [ ] Glass installation transaction
-* [ ] Service-only transaction
-* [ ] Flexible package pricing
-* [ ] Stock allocation
-* [ ] Technician assignment
-* [ ] Payment recording
-* [ ] Partial payment support
-* [ ] Payment status
-* [ ] Transaction confirmation
-* [ ] Invoice generation
-* [ ] Invoice printing
-* [ ] Profit calculation
+* [x] Customer selection (with inline creation)
+* [x] Vehicle selection (with inline creation)
+* [x] Glass availability lookup
+* [x] Rack availability display
+* [x] Price calculator
+* [x] Glass sale transaction
+* [x] Glass installation transaction
+* [x] Service-only transaction
+* [x] Flexible package pricing
+* [x] Stock allocation (FIFO on confirmation)
+* [x] Technician assignment
+* [x] Payment recording
+* [x] Partial payment support
+* [x] Payment status
+* [x] Transaction confirmation (atomic stock deduction)
+* [x] Invoice generation (INV-YYYY-NNNN format)
+* [x] Invoice printing
+* [x] Profit calculation
 
 ---
 

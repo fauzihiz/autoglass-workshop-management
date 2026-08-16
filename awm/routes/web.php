@@ -27,3 +27,9 @@ Route::get('/inventory/stock-in', Livewire\StockInIndex::class)->name('inventory
 Route::get('/inventory/stock-transfer', Livewire\StockTransferIndex::class)->name('inventory.stock-transfer');
 Route::get('/inventory/movements', Livewire\StockMovementIndex::class)->name('inventory.movements');
 Route::get('/inventory/opname', Livewire\StockOpnameIndex::class)->name('inventory.opname');
+
+// ── Transactions ──
+Route::get('/transactions', Livewire\TransactionIndex::class)->name('transactions.index');
+Route::get('/transactions/create', Livewire\TransactionCreate::class)->name('transactions.create');
+Route::get('/transactions/{transaction}', Livewire\TransactionShow::class)->name('transactions.show');
+Route::get('/transactions/{transaction}/print', Livewire\InvoicePrint::class)->name('invoices.print');
