@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\GlassProduct;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -42,10 +43,17 @@ class InventoryDashboardIndex extends Component
         $lowStockCount = $products->filter(fn ($p) => $p->total_stock > 0 && $p->total_stock <= $p->minimum_stock)->count();
         $outOfStockCount = $products->filter(fn ($p) => $p->total_stock === 0)->count();
 
-        $products = $products->paginate(15);
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $paginatedProducts = new LengthAwarePaginator(
+            $products->forPage($currentPage, 15),
+            $products->count(),
+            15,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         return view('livewire.inventory-dashboard-index', [
-            'products' => $products,
+            'products' => $paginatedProducts,
             'totalProducts' => $totalProducts,
             'totalStockValue' => $totalStockValue,
             'lowStockCount' => $lowStockCount,

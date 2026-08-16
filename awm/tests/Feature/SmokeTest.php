@@ -23,7 +23,7 @@ it('loads the glass products page', function () {
 it('loads the inventory dashboard', function () {
     $response = $this->get('/inventory');
     $response->assertOk();
-})->skip('Pre-existing issue: InventoryDashboardIndex uses Collection::paginate');
+});
 
 it('loads the transactions list', function () {
     $response = $this->get('/transactions');
