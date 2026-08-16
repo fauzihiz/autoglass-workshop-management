@@ -41,10 +41,9 @@ COPY awm/ .
 # Build frontend assets
 RUN npm run build
 
-# Optimize Laravel
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# NOTE: Do NOT run config:cache / route:cache / view:here.
+# Environment variables (APP_KEY, DB_HOST, etc.) are only
+# available at runtime, so caching must happen in entrypoint.sh.
 
 # Stage 2: Production runtime
 FROM php:8.3-cli
@@ -68,6 +67,10 @@ RUN mkdir -p storage/framework/{cache,sessions,views} \
     && chmod -R 775 storage bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
+# Copy entrypoint script
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 EXPOSE 8000
 
-CMD ["sh", "-c", "php artisan migrate --force --no-interaction && php artisan serve --host=0.0.0.0 --port=8000"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
