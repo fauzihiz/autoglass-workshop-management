@@ -1039,7 +1039,7 @@ Customer
 
 * [x] Initialize Laravel project
 * [x] Configure SQLite development database
-* [x] Configure PostgreSQL production deployment (Render + Supabase)
+* [x] Configure PostgreSQL production deployment (Supabase)
 * [x] Configure environment
 * [x] Set up Git repository
 * [x] Set up base layout
@@ -1165,7 +1165,6 @@ Customer
 **Goal:** Prepare the application for real workshop usage.
 
 * [x] Form validation review — already thorough across all 20+ Livewire components
-* [ ] Authorization architecture preparation — deferred to Phase 8
 * [x] Database indexing — production indexes on `transactions.status`, `transactions.type`, `stock_movements.type`, `stock_movements.created_at`, `payments.paid_at`, `stock_opnames.status`
 * [x] Error handling — try/catch on TransactionShow confirm/cancel, custom error views (404, 500, 419)
 * [x] Transaction confirm/cancel testing — FIFO stock deduction, insufficient stock, cancellation with stock restoration
@@ -1174,15 +1173,17 @@ Customer
 * [x] Invoice testing — format validation, sequential numbering
 * [x] Payment testing — recording, balance calculation, full payment detection
 * [x] Production smoke testing — 17 route tests covering all modules
-* [ ] Backup strategy — deferred to deployment phase
-* [x] Production environment configuration — `render.yaml` for Render Blueprint + `.env.production.example` for Supabase
-* [ ] Render deployment verification — pending live deployment
+* [x] Production environment configuration — `.env.production.example` for Supabase
 
 ---
 
 ## 🔐 Phase 8 — Authentication & Roles
 
 > Planned after the core workflow is stable.
+
+* [ ] Authorization architecture preparation
+* [ ] Backup strategy
+* [ ] VPS deployment verification
 
 Potential roles:
 
@@ -1221,7 +1222,7 @@ Inventory           ██████████ 100%
 Transactions        ██████████ 100%
 History & Complaint ██████████ 100%
 Analytics           ██████████ 100%
-Production          ██████░░░░  60%
+Production          ████████░░  75%
 Authentication      ░░░░░░░░░░   0%
 ```
 
@@ -1286,11 +1287,11 @@ Authentication      ░░░░░░░░░░   0%
 | Production     | Transaction tests              | 🟢      |
 | Production     | Stock & payment tests          | 🟢      |
 | Production     | Smoke tests                    | 🟢      |
-| Production     | Render config                  | 🟢      |
-| Production     | Render deployment verification | ⬜      |
+| Production     | VPS deployment verification    | ⬜      |
 | Production     | Backup strategy                | ⬜      |
 | Authentication | Login                          | ⬜      |
 | Authentication | Roles & permissions            | ⬜      |
+| Authentication | Authorization architecture     | ⬜      |
 
 ### Status Legend
 
