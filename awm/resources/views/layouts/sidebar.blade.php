@@ -26,6 +26,7 @@
                     ['route' => 'inventory.stock-lots', 'label' => 'Stock Lots', 'svg' => $d],
                     ['route' => 'inventory.stock-in', 'label' => 'Stock In', 'svg' => $d],
                     ['route' => 'inventory.stock-transfer', 'label' => 'Stock Transfer', 'svg' => $d],
+                    ['route' => 'inventory.stock-out', 'label' => 'Stock Out', 'svg' => $d],
                     ['route' => 'inventory.movements', 'label' => 'Stock Movements', 'svg' => $d],
                     ['route' => 'inventory.opname', 'label' => 'Stock Opname', 'svg' => $d],
                 ];

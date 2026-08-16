@@ -1083,7 +1083,7 @@ Customer
 * [x] Multi-rack stock support
 * [x] Stock-in workflow
 * [x] Stock transfer workflow
-* [ ] Stock-out workflow
+* [x] Stock-out workflow
 * [x] Stock movement history
 * [x] Minimum stock configuration
 * [x] Low-stock warnings

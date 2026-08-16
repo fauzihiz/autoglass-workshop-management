@@ -50,6 +50,18 @@ class TransactionShow extends Component
                 ->where('itemable_type', \App\Models\GlassProduct::class);
 
             foreach ($glassItems as $item) {
+                // Validate stock availability
+                $totalAvailable = StockBalance::where('quantity', '>', 0)
+                    ->whereHas('lot', fn ($q) => $q->where('glass_product_id', $item->itemable_id))
+                    ->sum('quantity');
+
+                if ($totalAvailable < $item->quantity) {
+                    $productName = $item->itemable->name ?? 'Unknown Product';
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'stock' => "Insufficient stock for {$productName}. Available: {$totalAvailable}, Requested: {$item->quantity}.",
+                    ]);
+                }
+
                 $remaining = $item->quantity;
                 $lots = StockBalance::where('quantity', '>', 0)
                     ->whereHas('lot', fn ($q) => $q->where('glass_product_id', $item->itemable_id))
@@ -91,8 +103,50 @@ class TransactionShow extends Component
 
     public function cancelTransaction(): void
     {
-        if ($this->transaction->status !== TransactionStatus::Pending->value) return;
-        $this->transaction->update(['status' => TransactionStatus::Cancelled->value]);
+        $currentStatus = $this->transaction->status;
+
+        if (! in_array($currentStatus, [
+            TransactionStatus::Pending->value,
+            TransactionStatus::Confirmed->value,
+        ])) {
+            return;
+        }
+
+        DB::transaction(function () use ($currentStatus) {
+            // If the transaction was confirmed, restore stock from allocations
+            if ($currentStatus === TransactionStatus::Confirmed->value) {
+                $allocations = StockAllocation::whereHas('transactionItem', function ($q) {
+                    $q->where('transaction_id', $this->transaction->id);
+                })->get();
+
+                foreach ($allocations as $allocation) {
+                    // Restore stock balance
+                    $balance = StockBalance::firstOrCreate(
+                        ['stock_lot_id' => $allocation->stock_lot_id, 'rack_id' => $allocation->rack_id],
+                        ['quantity' => 0]
+                    );
+                    $balance->increment('quantity', $allocation->quantity);
+
+                    // Create reverse movement record
+                    StockMovement::create([
+                        'stock_lot_id' => $allocation->stock_lot_id,
+                        'rack_id' => $allocation->rack_id,
+                        'type' => StockMovementType::In->value,
+                        'quantity' => $allocation->quantity,
+                        'reference_type' => Transaction::class,
+                        'reference_id' => $this->transaction->id,
+                        'notes' => 'Restored from cancelled ' . $this->transaction->invoice_number,
+                    ]);
+                }
+
+                // Remove allocation records
+                StockAllocation::whereHas('transactionItem', function ($q) {
+                    $q->where('transaction_id', $this->transaction->id);
+                })->delete();
+            }
+
+            $this->transaction->update(['status' => TransactionStatus::Cancelled->value]);
+        });
     }
 
     // ── Payments ──

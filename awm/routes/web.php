@@ -63,6 +63,7 @@ Route::get('/inventory', Livewire\InventoryDashboardIndex::class)->name('invento
 Route::get('/inventory/stock-lots', Livewire\StockLotIndex::class)->name('inventory.stock-lots');
 Route::get('/inventory/stock-in', Livewire\StockInIndex::class)->name('inventory.stock-in');
 Route::get('/inventory/stock-transfer', Livewire\StockTransferIndex::class)->name('inventory.stock-transfer');
+Route::get('/inventory/stock-out', Livewire\StockOutIndex::class)->name('inventory.stock-out');
 Route::get('/inventory/movements', Livewire\StockMovementIndex::class)->name('inventory.movements');
 Route::get('/inventory/opname', Livewire\StockOpnameIndex::class)->name('inventory.opname');
 

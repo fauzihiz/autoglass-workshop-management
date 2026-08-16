@@ -9,6 +9,9 @@
                 <x-button variant="primary" class="bg-green-600 hover:bg-green-500" wire:click="confirmTransaction" onclick="return confirm('Confirm this transaction? Stock will be deducted.')">✓ Confirm</x-button>
                 <x-button variant="danger" wire:click="cancelTransaction" onclick="return confirm('Cancel this transaction?')">Cancel</x-button>
             @endif
+            @if ($transaction->status === 'confirmed')
+                <x-button variant="danger" wire:click="cancelTransaction" onclick="return confirm('Cancel this confirmed transaction? Stock will be restored.')">Cancel & Restore Stock</x-button>
+            @endif
             @if ($transaction->balance_due > 0 && $transaction->status === 'confirmed')
                 <x-button variant="primary" wire:click="openPaymentModal">Record Payment</x-button>
             @endif
