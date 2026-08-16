@@ -19,3 +19,11 @@ Route::get('/suppliers', Livewire\SupplierIndex::class)->name('suppliers.index')
 Route::get('/technicians', Livewire\TechnicianIndex::class)->name('technicians.index');
 Route::get('/product-compatibilities', Livewire\ProductCompatibilityIndex::class)->name('product-compatibilities.index');
 Route::get('/product-accessories', Livewire\ProductAccessoryIndex::class)->name('product-accessories.index');
+
+// ── Inventory Management ──
+Route::get('/inventory', Livewire\InventoryDashboardIndex::class)->name('inventory.index');
+Route::get('/inventory/stock-lots', Livewire\StockLotIndex::class)->name('inventory.stock-lots');
+Route::get('/inventory/stock-in', Livewire\StockInIndex::class)->name('inventory.stock-in');
+Route::get('/inventory/stock-transfer', Livewire\StockTransferIndex::class)->name('inventory.stock-transfer');
+Route::get('/inventory/movements', Livewire\StockMovementIndex::class)->name('inventory.movements');
+Route::get('/inventory/opname', Livewire\StockOpnameIndex::class)->name('inventory.opname');

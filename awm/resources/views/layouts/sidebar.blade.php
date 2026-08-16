@@ -15,13 +15,19 @@
                     ['route' => 'car-brands.index', 'label' => 'Car Brands', 'svg' => $d],
                     ['route' => 'car-models.index', 'label' => 'Car Models', 'svg' => $d],
                     ['route' => 'glass-positions.index', 'label' => 'Glass Positions', 'svg' => $d],
-                    ['route' => 'racks.index', 'label' => 'Racks', 'svg' => $d, 'group' => 'Inventory'],
+                    ['route' => 'racks.index', 'label' => 'Racks', 'svg' => $d],
                     ['route' => 'accessories.index', 'label' => 'Accessories', 'svg' => $d],
                     ['route' => 'suppliers.index', 'label' => 'Suppliers', 'svg' => $d],
                     ['route' => 'services.index', 'label' => 'Services', 'svg' => $d],
                     ['route' => 'product-compatibilities.index', 'label' => 'Compatibilities', 'svg' => $d],
                     ['route' => 'product-accessories.index', 'label' => 'Product Accessories', 'svg' => $d],
                     ['route' => 'technicians.index', 'label' => 'Technicians', 'svg' => $d],
+                    ['route' => 'inventory.index', 'label' => 'Inventory Dashboard', 'svg' => $d, 'group' => 'Inventory'],
+                    ['route' => 'inventory.stock-lots', 'label' => 'Stock Lots', 'svg' => $d],
+                    ['route' => 'inventory.stock-in', 'label' => 'Stock In', 'svg' => $d],
+                    ['route' => 'inventory.stock-transfer', 'label' => 'Stock Transfer', 'svg' => $d],
+                    ['route' => 'inventory.movements', 'label' => 'Stock Movements', 'svg' => $d],
+                    ['route' => 'inventory.opname', 'label' => 'Stock Opname', 'svg' => $d],
                 ];
             @endphp
             @foreach ($links as $link)

@@ -29,4 +29,12 @@ class StockLot extends Model
     {
         return $this->hasMany(StockMovement::class);
     }
+
+    /**
+     * Total quantity across all racks for this lot.
+     */
+    public function getTotalQuantityAttribute(): int
+    {
+        return (int) $this->balances()->sum('quantity');
+    }
 }

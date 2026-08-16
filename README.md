@@ -3,7 +3,7 @@
 > A web-based management system for automotive glass workshops to manage customers, vehicles, glass inventory, rack locations, transactions, technicians, payments, and business insights in one place.
 
 **Status:** 🚧 In Development
-**Version:** 0.3.0
+**Version:** 0.4.0
 **Deployment Target:** VPS + Supabase PostgreSQL
 
 ---
@@ -1080,21 +1080,21 @@ Customer
 
 **Goal:** Build reliable multi-rack and supplier-lot inventory.
 
-* [ ] Stock lot management
-* [ ] Supplier purchase information
-* [ ] Actual purchase cost tracking
-* [ ] Stock balance management
-* [ ] Multi-rack stock support
-* [ ] Stock-in workflow
-* [ ] Stock transfer workflow
+* [x] Stock lot management
+* [x] Supplier purchase information
+* [x] Actual purchase cost tracking
+* [x] Stock balance management
+* [x] Multi-rack stock support
+* [x] Stock-in workflow
+* [x] Stock transfer workflow
 * [ ] Stock-out workflow
-* [ ] Stock movement history
-* [ ] Minimum stock configuration
-* [ ] Low-stock warnings
-* [ ] Out-of-stock warnings
-* [ ] Stock opname
-* [ ] Stock adjustment
-* [ ] Inventory search and filtering
+* [x] Stock movement history
+* [x] Minimum stock configuration
+* [x] Low-stock warnings
+* [x] Out-of-stock warnings
+* [x] Stock opname
+* [x] Stock adjustment
+* [x] Inventory search and filtering
 
 ---
 
@@ -1219,7 +1219,7 @@ Authentication is intentionally excluded from the initial development scope so t
 ```text
 Foundation          ██████████ 100%
 Master Data         ██████████ 100%
-Inventory           ░░░░░░░░░░   0%
+Inventory           ██████████ 100%
 Transactions        ░░░░░░░░░░   0%
 History & Complaint ░░░░░░░░░░   0%
 Analytics           ░░░░░░░░░░   0%
@@ -1255,14 +1255,14 @@ Authentication      ░░░░░░░░░░   0%
 | Master Data    | Product-accessory management   | 🟢      |
 | Master Data    | Service management             | 🟢      |
 | Master Data    | Rack management                | 🟢      |
-| Inventory      | Stock lot management           | ⬜      |
-| Inventory      | Stock-in                       | ⬜      |
-| Inventory      | Multi-rack stock               | ⬜      |
-| Inventory      | Stock transfer                 | ⬜      |
-| Inventory      | Stock movement                 | ⬜      |
-| Inventory      | Stock opname                   | ⬜      |
-| Inventory      | Minimum stock                  | ⬜      |
-| Inventory      | Low-stock warning              | ⬜      |
+| Inventory      | Stock lot management           | 🟢      |
+| Inventory      | Stock-in                       | 🟢      |
+| Inventory      | Multi-rack stock               | 🟢      |
+| Inventory      | Stock transfer                 | 🟢      |
+| Inventory      | Stock movement                 | 🟢      |
+| Inventory      | Stock opname                   | 🟢      |
+| Inventory      | Minimum stock                  | 🟢      |
+| Inventory      | Low-stock warning              | 🟢      |
 | Transactions   | Glass sale                     | ⬜      |
 | Transactions   | Glass installation             | ⬜      |
 | Transactions   | Service only                   | ⬜      |

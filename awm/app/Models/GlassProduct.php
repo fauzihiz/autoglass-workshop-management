@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read int $total_stock
+ */
 class GlassProduct extends Model
 {
     use SoftDeletes;
@@ -31,5 +34,16 @@ class GlassProduct extends Model
     public function stockLots()
     {
         return $this->hasMany(StockLot::class);
+    }
+
+    /**
+     * Total stock quantity across all lots and racks.
+     */
+    public function getTotalStockAttribute(): int
+    {
+        return StockBalance::whereIn(
+            'stock_lot_id',
+            $this->stockLots()->pluck('id')
+        )->sum('quantity');
     }
 }
