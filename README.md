@@ -3,7 +3,7 @@
 > A web-based management system for automotive glass workshops to manage customers, vehicles, glass inventory, rack locations, transactions, technicians, payments, and business insights in one place.
 
 **Status:** 🚧 In Development
-**Version:** 0.5.0
+**Version:** 0.6.0
 **Deployment Target:** VPS + Supabase PostgreSQL
 
 ---
@@ -1127,17 +1127,17 @@ Customer
 
 **Goal:** Make every completed job traceable.
 
-* [ ] Transaction history
-* [ ] Transaction detail
-* [ ] Customer history
-* [ ] Vehicle history
-* [ ] License plate lookup
-* [ ] Technician service history
-* [ ] Glass product history
-* [ ] Stock lot traceability
-* [ ] Invoice history
-* [ ] Payment history
-* [ ] Complaint lookup workflow
+* [x] Transaction history
+* [x] Transaction detail
+* [x] Customer history
+* [x] Vehicle history
+* [x] License plate lookup
+* [x] Technician service history
+* [x] Glass product history
+* [x] Stock lot traceability
+* [x] Invoice history
+* [x] Payment history
+* [x] Complaint lookup workflow
 
 ---
 
@@ -1220,8 +1220,8 @@ Authentication is intentionally excluded from the initial development scope so t
 Foundation          ██████████ 100%
 Master Data         ██████████ 100%
 Inventory           ██████████ 100%
-Transactions        ░░░░░░░░░░   0%
-History & Complaint ░░░░░░░░░░   0%
+Transactions        ██████████ 100%
+History & Complaint ██████████ 100%
 Analytics           ░░░░░░░░░░   0%
 Production          ░░░░░░░░░░   0%
 Authentication      ░░░░░░░░░░   0%
@@ -1263,19 +1263,19 @@ Authentication      ░░░░░░░░░░   0%
 | Inventory      | Stock opname                   | 🟢      |
 | Inventory      | Minimum stock                  | 🟢      |
 | Inventory      | Low-stock warning              | 🟢      |
-| Transactions   | Glass sale                     | ⬜      |
-| Transactions   | Glass installation             | ⬜      |
-| Transactions   | Service only                   | ⬜      |
-| Transactions   | Package pricing                | ⬜      |
-| Transactions   | Price calculator               | ⬜      |
-| Transactions   | Stock allocation               | ⬜      |
-| Transactions   | Technician assignment          | ⬜      |
-| Transactions   | Payment management             | ⬜      |
-| Transactions   | Invoice                        | ⬜      |
-| Transactions   | Profit calculation             | ⬜      |
-| History        | Transaction history            | ⬜      |
-| History        | Vehicle history                | ⬜      |
-| History        | Complaint traceability         | ⬜      |
+| Transactions   | Glass sale                     | 🟢      |
+| Transactions   | Glass installation             | 🟢      |
+| Transactions   | Service only                   | 🟢      |
+| Transactions   | Package pricing                | 🟢      |
+| Transactions   | Price calculator               | 🟢      |
+| Transactions   | Stock allocation               | 🟢      |
+| Transactions   | Technician assignment          | 🟢      |
+| Transactions   | Payment management             | 🟢      |
+| Transactions   | Invoice                        | 🟢      |
+| Transactions   | Profit calculation             | 🟢      |
+| History        | Transaction history            | 🟢      |
+| History        | Vehicle history                | 🟢      |
+| History        | Complaint traceability         | 🟢      |
 | Analytics      | Revenue dashboard              | ⬜      |
 | Analytics      | Profit dashboard               | ⬜      |
 | Analytics      | Glass sales analytics          | ⬜      |

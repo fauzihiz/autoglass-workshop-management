@@ -20,7 +20,9 @@
 
         @forelse ($items as $customer)
             <tr wire:key="cust-{{ $customer->id }}">
-                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">{{ $customer->name }}</td>
+                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
+                    <a href="{{ route('customers.show', $customer) }}" class="text-blue-600 hover:underline">{{ $customer->name }}</a>
+                </td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $customer->phone ?? '—' }}</td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $customer->email ?? '—' }}</td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm">

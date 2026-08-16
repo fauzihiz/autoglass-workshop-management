@@ -31,9 +31,9 @@
             <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                 <h3 class="mb-4 font-semibold text-gray-900">Customer & Vehicle</h3>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
-                    <div><span class="text-gray-500">Customer:</span> <span class="ml-1 font-medium text-gray-900">{{ $transaction->customer->name ?? '—' }}</span></div>
+                    <div><span class="text-gray-500">Customer:</span> <span class="ml-1 font-medium text-gray-900">@if ($transaction->customer)<a href="{{ route('customers.show', $transaction->customer) }}" class="text-blue-600 hover:underline">{{ $transaction->customer->name }}</a>@else —@endif</span></div>
                     <div><span class="text-gray-500">Phone:</span> <span class="ml-1 font-medium text-gray-900">{{ $transaction->customer->phone ?? '—' }}</span></div>
-                    <div><span class="text-gray-500">Vehicle:</span> <span class="ml-1 font-medium text-gray-900">{{ $transaction->vehicle->license_plate ?? '—' }}</span></div>
+                    <div><span class="text-gray-500">Vehicle:</span> <span class="ml-1 font-medium text-gray-900">@if ($transaction->vehicle)<a href="{{ route('vehicles.show', $transaction->vehicle) }}" class="text-blue-600 hover:underline">{{ $transaction->vehicle->license_plate }}</a>@else —@endif</span></div>
                     <div><span class="text-gray-500">Model:</span> <span class="ml-1 font-medium text-gray-900">{{ ($transaction->vehicle->brand->name ?? '') . ' ' . ($transaction->vehicle->model->name ?? '') }}</span></div>
                 </div>
 

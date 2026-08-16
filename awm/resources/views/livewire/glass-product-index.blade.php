@@ -23,7 +23,9 @@
         @forelse ($items as $product)
             <tr wire:key="gp-{{ $product->id }}">
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500"><x-badge>{{ $product->sku }}</x-badge></td>
-                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">{{ $product->name }}</td>
+                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
+                    <a href="{{ route('glass-products.show', $product) }}" class="text-blue-600 hover:underline">{{ $product->name }}</a>
+                </td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $product->glassPosition->name ?? '—' }}</td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $product->minimum_stock }}</td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm">

@@ -20,7 +20,9 @@
 
         @forelse ($items as $tech)
             <tr wire:key="tech-{{ $tech->id }}">
-                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">{{ $tech->name }}</td>
+                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
+                    <a href="{{ route('technicians.show', $tech) }}" class="text-blue-600 hover:underline">{{ $tech->name }}</a>
+                </td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $tech->phone ?? '—' }}</td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm">
                     <x-badge :variant="$tech->is_active ? 'green' : 'red'">{{ $tech->is_active ? 'Active' : 'Inactive' }}</x-badge>

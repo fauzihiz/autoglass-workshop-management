@@ -33,3 +33,12 @@ Route::get('/transactions', Livewire\TransactionIndex::class)->name('transaction
 Route::get('/transactions/create', Livewire\TransactionCreate::class)->name('transactions.create');
 Route::get('/transactions/{transaction}', Livewire\TransactionShow::class)->name('transactions.show');
 Route::get('/transactions/{transaction}/print', Livewire\InvoicePrint::class)->name('invoices.print');
+
+// ── History & Traceability (Phase 5) ──
+Route::get('/payments', Livewire\PaymentIndex::class)->name('payments.index');
+Route::get('/complaint-lookup', Livewire\ComplaintLookup::class)->name('complaint-lookup');
+Route::get('/customers/{customer}', Livewire\CustomerShow::class)->name('customers.show');
+Route::get('/vehicles/{vehicle}', Livewire\VehicleShow::class)->name('vehicles.show');
+Route::get('/technicians/{technician}', Livewire\TechnicianShow::class)->name('technicians.show');
+Route::get('/glass-products/{glassProduct}', Livewire\GlassProductShow::class)->name('glass-products.show');
+Route::get('/inventory/stock-lots/{stockLot}', Livewire\StockLotShow::class)->name('inventory.stock-lots.show');

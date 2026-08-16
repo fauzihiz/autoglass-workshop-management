@@ -22,7 +22,9 @@
 
         @forelse ($items as $vehicle)
             <tr wire:key="veh-{{ $vehicle->id }}">
-                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">{{ $vehicle->license_plate }}</td>
+                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
+                    <a href="{{ route('vehicles.show', $vehicle) }}" class="text-blue-600 hover:underline">{{ $vehicle->license_plate }}</a>
+                </td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $vehicle->customer->name ?? '—' }}</td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $vehicle->brand->name ?? '—' }}</td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $vehicle->model->name ?? '—' }}</td>

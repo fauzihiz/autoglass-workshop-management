@@ -24,7 +24,9 @@
 
         @forelse ($items as $lot)
             <tr wire:key="lot-{{ $lot->id }}">
-                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">{{ $lot->lot_number }}</td>
+                <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
+                    <a href="{{ route('inventory.stock-lots.show', $lot) }}" class="text-blue-600 hover:underline">{{ $lot->lot_number }}</a>
+                </td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $lot->product->name ?? '—' }}</td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $lot->supplier->name ?? '—' }}</td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">Rp {{ number_format($lot->purchase_cost, 0, ',', '.') }}</td>

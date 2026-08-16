@@ -38,7 +38,8 @@ class TransactionIndex extends Component
             ->when($this->search !== '', function ($q) {
                 $q->where(function ($sq) {
                     $sq->where('invoice_number', 'like', '%' . $this->search . '%')
-                        ->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', '%' . $this->search . '%'));
+                        ->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', '%' . $this->search . '%'))
+                        ->orWhereHas('vehicle', fn ($vq) => $vq->where('license_plate', 'like', '%' . $this->search . '%'));
                 });
             })
             ->latest()
