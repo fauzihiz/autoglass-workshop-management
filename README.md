@@ -579,6 +579,23 @@ npm -v
 git --version
 ```
 
+### Dual Database Setup
+
+This project supports **two database backends** for different environments:
+
+| Environment | Database | Driver | Notes |
+|-------------|----------|--------|-------|
+| **Local Development** | SQLite | `sqlite` | Zero-config, file-based. Default in `.env.example` |
+| **Production (VPS)** | Supabase PostgreSQL | `pgsql` | Use `.env.production.example` as template |
+
+All 25 migrations are written in database-agnostic SQL — no PostgreSQL-specific syntax is used. Both SQLite and PostgreSQL are fully supported without migration changes.
+
+**Key points:**
+
+* `SESSION_DRIVER=database`, `QUEUE_CONNECTION=database`, and `CACHE_STORE=database` all work with SQLite locally — no changes needed when switching environments.
+* The `.env.example` file defaults to SQLite. The `.env.production.example` file contains the Supabase PostgreSQL template.
+* To switch between environments, simply adjust `DB_CONNECTION` and the corresponding `DB_*` variables in your `.env`.
+
 ---
 
 ## 🚀 Getting Started
